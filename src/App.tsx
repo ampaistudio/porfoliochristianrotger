@@ -1,64 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Photo, PortfolioConfig, ClientReviewSession, ClientFeedback } from "./types";
 import { DEFAULT_CONFIG, DEFAULT_PHOTOS, DEFAULT_CLIENT_REVIEWS } from "./defaultData";
-import { loadPhotosFromDB, savePhotosToDB } from "./utils/db";
+import { fetchPhotos, fetchConfig, fetchReviews, updateConfigInSupabase, insertReviewSessionInSupabase, deleteAllReviewsInSupabase } from "./utils/supabase";
 import PhotographerDashboard from "./components/PhotographerDashboard";
 import ClientPortfolioView from "./components/ClientPortfolioView";
 import AdminLogin from "./components/AdminLogin";
-import { Eye, ShieldAlert, CheckCircle, RefreshCw, Smartphone, Monitor } from "lucide-react";
+import { Eye, ShieldAlert, CheckCircle, RefreshCw, Smartphone, Monitor, Moon, Sun } from "lucide-react";
 
 export default function App() {
-  // 1. Core State with localStorage fallback for persistence
-  const [photos, setPhotos] = useState<Photo[]>(() => {
-    try {
-      const saved = localStorage.getItem("portfolio_photos");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error("Error loading photos from localStorage:", e);
-    }
-    return DEFAULT_PHOTOS;
-  });
+  // 1. Core State with IndexedDB for heavy persistence (photos) and localStorage for config
+  const [photos, setPhotos] = useState<Photo[]>([]);
 
-  const [config, setConfig] = useState<PortfolioConfig>(() => {
-    try {
-      const saved = localStorage.getItem("portfolio_config");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === "object" && parsed.photographerName) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error("Error loading config from localStorage:", e);
-    }
-    return DEFAULT_CONFIG;
-  });
-
-  const [reviews, setReviews] = useState<ClientReviewSession[]>(() => {
-    try {
-      const saved = localStorage.getItem("portfolio_reviews");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error("Error loading reviews from localStorage:", e);
-    }
-    return DEFAULT_CLIENT_REVIEWS;
-  });
+  const [config, setConfig] = useState<PortfolioConfig>(DEFAULT_CONFIG);
+  const [reviews, setReviews] = useState<ClientReviewSession[]>(DEFAULT_CLIENT_REVIEWS);
 
   // Current view mode: 'photographer' (admin panel) vs 'client' (external portfolio share)
   const [viewMode, setViewMode] = useState<"photographer" | "client">(() => {
     // Check if '?view=client' is in the URL path to start in Client View automatically
     const params = new URLSearchParams(window.location.search);
     return params.get("view") === "client" ? "client" : "photographer";
+  });
+
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem("dashboard_theme") !== "light"; // Default to dark mode for admin
   });
 
   // Security and Authentication States
@@ -74,7 +38,7 @@ export default function App() {
   });
 
   const [adminPassword, setAdminPassword] = useState<string>(() => {
-    return localStorage.getItem("admin_password") || "admin";
+    return import.meta.env.VITE_ADMIN_PASSWORD || localStorage.getItem("admin_password") || "Gordini+2026";
   });
 
   const [authorizedEmails, setAuthorizedEmails] = useState<string[]>(() => {
@@ -87,11 +51,16 @@ export default function App() {
     } catch (e) {
       console.error("Error reading whitelisted emails:", e);
     }
+    const envEmails = import.meta.env.VITE_AUTHORIZED_EMAILS;
+    if (envEmails) {
+      return envEmails.split(",").map((email: string) => email.trim());
+    }
     return ["rotgerchristian@gmail.com"];
   });
 
   const [googleClientId, setGoogleClientId] = useState<string>(() => {
     return (
+      import.meta.env.VITE_GOOGLE_CLIENT_ID ||
       localStorage.getItem("google_client_id") ||
       "448653609355-68049j4u9b456co09k96pco6p8v3f38h.apps.googleusercontent.com"
     );
@@ -101,6 +70,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("admin_password", adminPassword);
   }, [adminPassword]);
+
+  useEffect(() => {
+    localStorage.setItem("dashboard_theme", isDarkMode ? "dark" : "light");
+  }, [isDarkMode]);
 
   useEffect(() => {
     localStorage.setItem("auth_google_emails", JSON.stringify(authorizedEmails));
@@ -114,58 +87,34 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState("");
   const [isDbLoaded, setIsDbLoaded] = useState(false);
 
-  // Load photos from IndexedDB on initial mount for high capacity
+  // Load all data from Supabase on initial mount
   useEffect(() => {
     async function initDB() {
       try {
-        const dbPhotos = await loadPhotosFromDB();
+        const [dbPhotos, dbConfig, dbReviews] = await Promise.all([
+          fetchPhotos(),
+          fetchConfig(),
+          fetchReviews()
+        ]);
+        
         if (dbPhotos && dbPhotos.length > 0) {
           setPhotos(dbPhotos);
-          console.log("Successfully loaded photos from IndexedDB storage.");
         } else {
-          console.log("IndexedDB was empty. Retaining defaults/localStorage.");
+          setPhotos(DEFAULT_PHOTOS);
         }
+
+        setConfig(dbConfig);
+        setReviews(dbReviews);
+        console.log("Successfully loaded portfolio data from Supabase.");
+
       } catch (error) {
-        console.error("Failed to restore photos from IndexedDB:", error);
+        console.error("Failed to fetch from Supabase:", error);
       } finally {
         setIsDbLoaded(true);
       }
     }
     initDB();
   }, []);
-
-  // 2. Synchronize states with localStorage and IndexedDB on every change safely
-  useEffect(() => {
-    if (!isDbLoaded) return; // Prevent initial render overwriting data with defaults!
-
-    // 1. Try saving to IndexedDB (as primary high-capacity storage for base64)
-    savePhotosToDB(photos).catch(err => console.error("Error at savePhotosToDB:", err));
-
-    // 2. Try saving to localStorage (as fallback)
-    try {
-      localStorage.setItem("portfolio_photos", JSON.stringify(photos));
-    } catch (e) {
-      console.warn("localStorage quota exceeded, but photos are safely saved in IndexedDB database storage.", e);
-    }
-  }, [photos, isDbLoaded]);
-
-  useEffect(() => {
-    if (!isDbLoaded) return;
-    try {
-      localStorage.setItem("portfolio_config", JSON.stringify(config));
-    } catch (e) {
-      console.error("No se pudo persistir 'portfolio_config' en localStorage:", e);
-    }
-  }, [config, isDbLoaded]);
-
-  useEffect(() => {
-    if (!isDbLoaded) return;
-    try {
-      localStorage.setItem("portfolio_reviews", JSON.stringify(reviews));
-    } catch (e) {
-      console.error("No se pudo persistir 'portfolio_reviews' en localStorage:", e);
-    }
-  }, [reviews, isDbLoaded]);
 
   // Sync viewMode changes to address bar without refreshing for seamless simulation
   const handleViewModeChange = (mode: "photographer" | "client") => {
@@ -188,50 +137,32 @@ export default function App() {
     setPhotos(updatedPhotos);
   };
 
-  const handleConfigUpdate = (updatedConfig: PortfolioConfig) => {
+  const handleConfigUpdate = async (updatedConfig: PortfolioConfig) => {
     setConfig(updatedConfig);
+    await updateConfigInSupabase(updatedConfig);
   };
 
   const handleImportAllData = (importedPhotos: Photo[], importedConfig: PortfolioConfig, importedReviews: ClientReviewSession[]) => {
-    // Suspend saving during assignment to avoid multiple intermediate states
-    setIsDbLoaded(false);
-
+    // Note: Con Supabase, la importación se hace mediante el script backend (Fase 2 KAIZEN).
+    // Esta función en UI queda obsoleta, pero se puede simular actualizando el estado local y pidiendo refresco.
     setPhotos(importedPhotos);
     setConfig(importedConfig);
     setReviews(importedReviews);
 
-    // Persist directly to secure structures
-    savePhotosToDB(importedPhotos)
-      .then(() => {
-        setIsDbLoaded(true);
-        console.log("Successfully loaded backup in-memory structures and storage.");
-      })
-      .catch(err => {
-        setIsDbLoaded(true);
-        console.error("IndexedDB store error during restore:", err);
-      });
-
-    try {
-      localStorage.setItem("portfolio_photos", JSON.stringify(importedPhotos));
-      localStorage.setItem("portfolio_config", JSON.stringify(importedConfig));
-      localStorage.setItem("portfolio_reviews", JSON.stringify(importedReviews));
-    } catch (e) {
-      console.warn("localStorage quota warning during import. Fully loaded in IndexedDB.", e);
-    }
-
-    setToastMessage("🔄 ¡Portafolio y fotos restaurados con éxito desde tu respaldo!");
+    setToastMessage("🔄 Los datos locales se han actualizado (Para sincronizar a Supabase usa el script de migración)");
     setShowStatusToast(true);
     setTimeout(() => setShowStatusToast(false), 4500);
   };
 
-  const handleClearReviews = () => {
+  const handleClearReviews = async () => {
+    await deleteAllReviewsInSupabase();
     setReviews([]);
     setToastMessage("Se ha limpiado el historial de feedback de clientes.");
     setShowStatusToast(true);
     setTimeout(() => setShowStatusToast(false), 3000);
   };
 
-  const handleClientFeedbackSubmit = (
+  const handleClientFeedbackSubmit = async (
     clientName: string,
     clientEmail: string,
     companyName: string,
@@ -249,7 +180,11 @@ export default function App() {
       status: "active",
     };
 
+    // Update locally instantly for UX
     setReviews([newSession, ...reviews]);
+    
+    // Push to Supabase
+    await insertReviewSessionInSupabase(newSession);
     
     setToastMessage("Se envió el feedback. ¡Puedes comprobarlo en el panel del Fotógrafo!");
     setShowStatusToast(true);
@@ -280,9 +215,10 @@ export default function App() {
   const clientLinkUrl = `${window.location.origin}${window.location.pathname}?view=client`;
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col justify-between">
+    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" && isDarkMode ? "dark-theme bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-900"}`}>
       
       {/* Dynamic View Selector floating top banner */}
+      {isAuthenticated && (
       <div className="bg-stone-900 border-b border-stone-800 text-stone-300 py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono font-bold z-50">
         <div className="flex items-center gap-2">
           <span className="p-1 bg-amber-600 rounded text-white text-[10px]">PREVISUALIZACIÓN</span>
@@ -314,17 +250,27 @@ export default function App() {
             </button>
           </div>
 
-          {viewMode === "photographer" && isAuthenticated && (
-            <button
-              onClick={handleLogout}
-              className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900 border border-red-900/40 text-red-200 hover:text-white rounded-lg transition-all duration-250 cursor-pointer text-[10px]"
-              title="Cerrar sesión de administrador"
-            >
-              🚪 Salir Panel
-            </button>
+          {viewMode === "photographer" && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="px-2.5 py-1.5 bg-stone-800/80 hover:bg-stone-700 border border-stone-700 text-stone-300 hover:text-white rounded-lg transition-all duration-250 cursor-pointer flex items-center justify-center"
+                title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+              >
+                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900 border border-red-900/40 text-red-200 hover:text-white rounded-lg transition-all duration-250 cursor-pointer text-[10px]"
+                title="Cerrar sesión de administrador"
+              >
+                🚪 Salir Panel
+              </button>
+            </div>
           )}
         </div>
       </div>
+      )}
 
       {/* Main View Display Router */}
       <div className="flex-1">

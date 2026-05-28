@@ -8,21 +8,8 @@ import AdminLogin from "./components/AdminLogin";
 import { Eye, ShieldAlert, CheckCircle, RefreshCw, Smartphone, Monitor, Moon, Sun } from "lucide-react";
 
 export default function App() {
-  // 1. Core State with localStorage fallback for persistence
-  const [photos, setPhotos] = useState<Photo[]>(() => {
-    try {
-      const saved = localStorage.getItem("portfolio_photos");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error("Error loading photos from localStorage:", e);
-    }
-    return DEFAULT_PHOTOS;
-  });
+  // 1. Core State with IndexedDB for heavy persistence (photos) and localStorage for config
+  const [photos, setPhotos] = useState<Photo[]>([]);
 
   const [config, setConfig] = useState<PortfolioConfig>(() => {
     try {
@@ -30,6 +17,13 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === "object" && parsed.photographerName) {
+          if (!parsed.categories || !Array.isArray(parsed.categories)) {
+            parsed.categories = [...(DEFAULT_CONFIG.categories || [])];
+          } else {
+            // Restore missing default categories that were accidentally lost during the dynamic update
+            const merged = Array.from(new Set([...(DEFAULT_CONFIG.categories || []), ...parsed.categories]));
+            parsed.categories = merged;
+          }
           return parsed;
         }
       }
@@ -78,7 +72,7 @@ export default function App() {
   });
 
   const [adminPassword, setAdminPassword] = useState<string>(() => {
-    return localStorage.getItem("admin_password") || "Gordini+2026";
+    return import.meta.env.VITE_ADMIN_PASSWORD || localStorage.getItem("admin_password") || "Gordini+2026";
   });
 
   const [authorizedEmails, setAuthorizedEmails] = useState<string[]>(() => {
@@ -91,11 +85,16 @@ export default function App() {
     } catch (e) {
       console.error("Error reading whitelisted emails:", e);
     }
+    const envEmails = import.meta.env.VITE_AUTHORIZED_EMAILS;
+    if (envEmails) {
+      return envEmails.split(",").map((email: string) => email.trim());
+    }
     return ["rotgerchristian@gmail.com"];
   });
 
   const [googleClientId, setGoogleClientId] = useState<string>(() => {
     return (
+      import.meta.env.VITE_GOOGLE_CLIENT_ID ||
       localStorage.getItem("google_client_id") ||
       "448653609355-68049j4u9b456co09k96pco6p8v3f38h.apps.googleusercontent.com"
     );
@@ -131,10 +130,31 @@ export default function App() {
           setPhotos(dbPhotos);
           console.log("Successfully loaded photos from IndexedDB storage.");
         } else {
-          console.log("IndexedDB was empty. Retaining defaults/localStorage.");
+          // Attempt migration from localStorage if IndexedDB is empty
+          let migrated = false;
+          try {
+            const saved = localStorage.getItem("portfolio_photos");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setPhotos(parsed);
+                localStorage.removeItem("portfolio_photos");
+                console.log("Migrated photos from localStorage to IndexedDB.");
+                migrated = true;
+              }
+            }
+          } catch(e) {
+            console.warn("Migration failed:", e);
+          }
+          
+          if (!migrated) {
+            console.log("IndexedDB was empty. Retaining defaults.");
+            setPhotos(DEFAULT_PHOTOS);
+          }
         }
       } catch (error) {
         console.error("Failed to restore photos from IndexedDB:", error);
+        setPhotos(DEFAULT_PHOTOS);
       } finally {
         setIsDbLoaded(true);
       }
@@ -146,15 +166,8 @@ export default function App() {
   useEffect(() => {
     if (!isDbLoaded) return; // Prevent initial render overwriting data with defaults!
 
-    // 1. Try saving to IndexedDB (as primary high-capacity storage for base64)
+    // Save to IndexedDB (as primary high-capacity storage for base64)
     savePhotosToDB(photos).catch(err => console.error("Error at savePhotosToDB:", err));
-
-    // 2. Try saving to localStorage (as fallback)
-    try {
-      localStorage.setItem("portfolio_photos", JSON.stringify(photos));
-    } catch (e) {
-      console.warn("localStorage quota exceeded, but photos are safely saved in IndexedDB database storage.", e);
-    }
   }, [photos, isDbLoaded]);
 
   useEffect(() => {
@@ -205,6 +218,12 @@ export default function App() {
     setIsDbLoaded(false);
 
     setPhotos(importedPhotos);
+    let finalCategories = importedConfig.categories || [];
+    if (!Array.isArray(finalCategories)) finalCategories = [];
+    
+    // Merge defaults to ensure no standard categories are lost from old JSONs
+    importedConfig.categories = Array.from(new Set([...(DEFAULT_CONFIG.categories || []), ...finalCategories]));
+
     setConfig(importedConfig);
     setReviews(importedReviews);
 
@@ -220,11 +239,10 @@ export default function App() {
       });
 
     try {
-      localStorage.setItem("portfolio_photos", JSON.stringify(importedPhotos));
       localStorage.setItem("portfolio_config", JSON.stringify(importedConfig));
       localStorage.setItem("portfolio_reviews", JSON.stringify(importedReviews));
     } catch (e) {
-      console.warn("localStorage quota warning during import. Fully loaded in IndexedDB.", e);
+      console.warn("localStorage quota warning during import.", e);
     }
 
     setToastMessage("🔄 ¡Portafolio y fotos restaurados con éxito desde tu respaldo!");
@@ -291,6 +309,7 @@ export default function App() {
     <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" && isDarkMode ? "dark-theme bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-900"}`}>
       
       {/* Dynamic View Selector floating top banner */}
+      {isAuthenticated && (
       <div className="bg-stone-900 border-b border-stone-800 text-stone-300 py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono font-bold z-50">
         <div className="flex items-center gap-2">
           <span className="p-1 bg-amber-600 rounded text-white text-[10px]">PREVISUALIZACIÓN</span>
@@ -322,7 +341,7 @@ export default function App() {
             </button>
           </div>
 
-          {viewMode === "photographer" && isAuthenticated && (
+          {viewMode === "photographer" && (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -342,6 +361,7 @@ export default function App() {
           )}
         </div>
       </div>
+      )}
 
       {/* Main View Display Router */}
       <div className="flex-1">

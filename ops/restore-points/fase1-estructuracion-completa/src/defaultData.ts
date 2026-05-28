@@ -8,6 +8,20 @@ export const DEFAULT_CONFIG: PortfolioConfig = {
   instagram: "christian.rotger.ph",
   twitter: "crotger_wild",
   brandColor: "#0f766e", // Deep Teal / Ocean Pine
+  categories: [
+    "Vida Silvestre | Wildlife",
+    "Paisaje | Landscape",
+    "Costa Rica | Costa Rica",
+    "Antártida | Antarctica",
+    "South Georgias | South Georgias",
+    "Europa | Europe",
+    "Ushuaia | Ushuaia",
+    "Sport | Sport",
+    "Retrato | Portrait",
+    "Moda y Editorial | Fashion & Editorial",
+    "Casamiento y Evento | Wedding & Event",
+    "Otro | Other"
+  ]
 };
 
 export const DEFAULT_PHOTOS: Photo[] = [

@@ -37,10 +37,6 @@ export interface PortfolioConfig {
   instagram: string;
   twitter: string;
   brandColor: string; // Tailwind accent or hex hex color code
+  categories?: string[];
 }
 
-export interface AICaptionResponse {
-  caption: string;
-  editorialReview: string;
-  suggestedSettings: string;
-}
