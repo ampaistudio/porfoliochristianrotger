@@ -16,9 +16,21 @@ export default function App() {
 
   // Current view mode: 'photographer' (admin panel) vs 'client' (external portfolio share)
   const [viewMode, setViewMode] = useState<"photographer" | "client">(() => {
-    // Check if '?view=client' is in the URL path to start in Client View automatically
     const params = new URLSearchParams(window.location.search);
-    return params.get("view") === "client" ? "client" : "photographer";
+    if (params.get("view") === "client") return "client";
+    if (params.get("view") === "photographer" || params.get("view") === "admin") return "photographer";
+    
+    // Default to photographer ONLY if they are already logged in
+    try {
+      if (typeof window !== "undefined" && sessionStorage.getItem("admin_authenticated") === "true") {
+        return "photographer";
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    
+    // By default, anyone who visits the root URL sees the public portfolio
+    return "client";
   });
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -219,7 +231,7 @@ export default function App() {
   };
 
   // Build client link url
-  const clientLinkUrl = `${window.location.origin}${window.location.pathname}?view=client`;
+  const clientLinkUrl = `${window.location.origin}${window.location.pathname}`;
 
   return (
     <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" && isAuthenticated && isDarkMode ? "dark-theme bg-stone-100 text-stone-900" : viewMode === "photographer" && !isAuthenticated ? "bg-stone-950" : "bg-stone-100 text-stone-900"}`}>
