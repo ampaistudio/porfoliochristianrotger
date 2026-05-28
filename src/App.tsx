@@ -329,9 +329,18 @@ export default function App() {
 
       {/* Small informative app footer */}
       {viewMode === "photographer" && (
-        <footer className="bg-stone-50 border-t border-stone-200/60 py-6 text-center text-xs text-stone-500 font-sans mt-auto">
+        <footer className={`border-t py-6 text-center text-xs font-sans mt-auto ${
+          !isAuthenticated 
+            ? "bg-stone-950 border-stone-900 text-stone-500" 
+            : "bg-stone-50 border-stone-200/60 text-stone-500"
+        }`}>
+          <div className="flex justify-center mb-3">
+            <span className="text-[10px] font-mono tracking-[0.2em] font-extrabold text-stone-400 bg-stone-500/10 px-2 py-0.5 rounded border border-stone-500/20">
+              NODO <span className="text-emerald-500">AI</span> AGENCY
+            </span>
+          </div>
           <p>© 2026 {config.photographerName} PH • Portafolio de Aprobación & Presentación de Alta Gama</p>
-          <p className="mt-1 text-stone-400">Potenciado con Gemini AI para generación de descripciones editoriales para el cliente.</p>
+          <p className="mt-1 opacity-70">Potenciado con Gemini AI para flujos de trabajo inteligentes.</p>
         </footer>
       )}
 
