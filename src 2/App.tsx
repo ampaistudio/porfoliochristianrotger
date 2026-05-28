@@ -78,7 +78,7 @@ export default function App() {
   });
 
   const [adminPassword, setAdminPassword] = useState<string>(() => {
-    return localStorage.getItem("admin_password") || "admin";
+    return localStorage.getItem("admin_password") || "Gordini+2026";
   });
 
   const [authorizedEmails, setAuthorizedEmails] = useState<string[]>(() => {

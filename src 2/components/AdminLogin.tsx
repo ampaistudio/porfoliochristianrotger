@@ -313,19 +313,7 @@ export default function AdminLogin({
                 <span>{lang === "es" ? "INGRESAR AL PANEL" : "LOGIN TO DASHBOARD"}</span>
               </button>
 
-              <div className="bg-stone-950/40 border border-stone-850 p-3.5 rounded-xl text-center text-[11px] text-stone-400 font-mono">
-                {lang === "es" ? (
-                  <>
-                    💡 Contraseña por defecto: <span className="text-amber-400 font-bold bg-stone-900 px-2 py-0.5 rounded border border-stone-800">admin</span>
-                    <span className="block mt-1 text-[10px] text-stone-500">(Puedes modificarla en cualquier momento dentro del panel)</span>
-                  </>
-                ) : (
-                  <>
-                    💡 Default password: <span className="text-amber-400 font-bold bg-stone-900 px-2 py-0.5 rounded border border-stone-800">admin</span>
-                    <span className="block mt-1 text-[10px] text-stone-500">(You can edit this any time inside the dashboard settings)</span>
-                  </>
-                )}
-              </div>
+
             </form>
           )}
 
