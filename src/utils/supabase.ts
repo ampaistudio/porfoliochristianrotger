@@ -62,6 +62,17 @@ export async function fetchReviews(): Promise<ClientReviewSession[]> {
   }));
 }
 
+export async function checkDbConnection(): Promise<boolean> {
+  try {
+    // Ping a lightweight table just to see if we can read 1 row
+    const { error } = await supabase.from('photos').select('id').limit(1);
+    if (error) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function savePhotoToSupabase(photo: Photo) {
   const payload = {
     ...photo,

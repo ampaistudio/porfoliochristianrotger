@@ -55,7 +55,7 @@ Do not include markdown blocks, just the pure JSON object. Keep the curatorial r
     `;
 
     const payload = {
-      model: "google/gemini-1.5-flash",
+      model: "google/gemini-flash-1.5",
       messages: [
         {
           role: "user",

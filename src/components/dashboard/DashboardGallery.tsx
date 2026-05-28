@@ -3,7 +3,7 @@ import { Camera, Trash2, Sliders, PlusCircle, Image as ImageIcon, Upload, Pencil
 import { Photo, PortfolioConfig } from "../../types";
 import { getLocalizedText } from "../../defaultData";
 import { compressImage, extractExifMetadata } from "../../utils/image";
-import { savePhotoToSupabase, deletePhotoFromSupabase } from "../../utils/supabase";
+import { savePhotoToSupabase, deletePhotoFromSupabase, checkDbConnection } from "../../utils/supabase";
 import GalleryPhotoForm from "./GalleryPhotoForm";
 
 interface DashboardGalleryProps { photos: Photo[]; onUpdatePhotos: (photos: Photo[]) => void; config: PortfolioConfig; onUpdateConfig: (config: PortfolioConfig) => void; }
@@ -21,11 +21,16 @@ export default function DashboardGallery({
   const [newPhotoSettings, setNewPhotoSettings] = useState("f/1.8, 1/250s, ISO 100"); const [newPhotoEditorial, setNewPhotoEditorial] = useState("");
   const [newPhotoSuggested, setNewPhotoSuggested] = useState(""); const [newPhotoStatus, setNewPhotoStatus] = useState<'published' | 'draft'>('published');
   const [newPhotoTranslations, setNewPhotoTranslations] = useState({ title_es: "", description_es: "", editorialReview_es: "", suggestedSettings_es: "" });
-
-  const [isProcessingImage, setIsProcessingImage] = useState(false);
-  const [batchUploadStatus, setBatchUploadStatus] = useState<{ current: number; total: number; fileName: string; } | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false); const [batchUploadStatus, setBatchUploadStatus] = useState<{ current: number; total: number; fileName: string; } | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null); const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false); const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dbStatus, setDbStatus] = useState<"checking" | "online" | "offline">("checking");
+
+  React.useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    const checkStatus = async () => { const isOnline = await checkDbConnection(); setDbStatus(isOnline ? "online" : "offline"); };
+    checkStatus(); interval = setInterval(checkStatus, 30000); return () => clearInterval(interval);
+  }, []);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -353,6 +358,22 @@ export default function DashboardGallery({
                 </div>
               )}
             </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm uppercase tracking-widest font-mono font-medium text-stone-800">
+                  Inventario de Galería
+                </h2>
+                {dbStatus === "checking" && <span className="text-[10px] bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full font-mono">Conectando...</span>}
+                {dbStatus === "online" && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> DB Online</span>}
+                {dbStatus === "offline" && <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-mono flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> DB ERROR - No guardes</span>}
+              </div>
+              <button
+                onClick={() => { resetForm(); setShowAddForm(!showAddForm); }}
+                className="text-[11px] text-stone-500 underline decoration-stone-300"
+              >
+                Cerrar Panel
+              </button>
+            </div>
             <div className="mt-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-stone-500 font-sans px-1 leading-relaxed">
               <span>📸 <strong>Formatos Soportados:</strong> .JPG, .JPEG, .PNG, .WebP con EXIF (Evita archivos RAW y Apple HEIC directamente).</span>
               <span>⚙️ <strong>Optimización Automática:</strong> Redimensionamos y comprimimos tus fotos HD automáticamente a tamaños aptos de web (~150-250KB).</span>
@@ -396,21 +417,9 @@ export default function DashboardGallery({
       {/* Grid displays current photos in portfolio */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {photos.map((photo) => (
-          <div 
-            key={photo.id} 
-            draggable
-            onDragStart={(e) => handleDragStart(e, photo.id)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDropPhoto(e, photo.id)}
-            className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition flex flex-col justify-between cursor-move"
-          >
+          <div key={photo.id} draggable onDragStart={(e) => handleDragStart(e, photo.id)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => handleDropPhoto(e, photo.id)} className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition flex flex-col justify-between cursor-move">
             <div className="aspect-[4/3] bg-stone-100 relative overflow-hidden group">
-              <img
-                src={photo.url}
-                alt={photo.title}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+              <img src={photo.url} alt={photo.title} className="w-full h-full object-cover" referrerPolicy="no-referrer"/>
               <div className="absolute top-3 left-3 flex flex-col gap-1">
                 <span className="bg-stone-900/90 text-white text-[9px] font-mono tracking-wider px-2 py-0.5 rounded uppercase font-bold">
                   {photo.category ? photo.category.split(", ").map((c) => getLocalizedText(c, "es")).join(" / ") : "Sin Categoría"}
