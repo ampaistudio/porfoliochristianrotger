@@ -289,11 +289,11 @@ export default function ClientPortfolioView({
           <p className="text-stone-300 font-light text-sm">
             © 2026 {config.photographerName} PH • {lang === "es" ? "Fotografía de Conservación & Paisaje" : "Conservation & Landscape Photography"}
           </p>
-          <p className="mt-2 text-stone-600 text-[10px] sm:text-xs font-mono max-w-2xl mx-auto leading-relaxed">
-            {lang === "es" 
-              ? "Potenciado con Inteligencia Artificial Gemini para análisis editorial y sugerencias de parámetros óptimos para fotografía salvaje." 
-              : "Powered by Gemini AI for contextual curatorial analysis and optimal wild shooting suggestions."
-            }
+          <p className="mt-2 text-stone-600 text-[10px] sm:text-xs font-mono max-w-2xl mx-auto leading-relaxed flex flex-col gap-1 items-center">
+            <span>Powered by Nodo Ai Agency</span>
+            <a href="https://www.nodoai.co" target="_blank" rel="noreferrer" className="hover:text-stone-400 transition-colors">
+              www.nodoai.co
+            </a>
           </p>
         </div>
       </footer>

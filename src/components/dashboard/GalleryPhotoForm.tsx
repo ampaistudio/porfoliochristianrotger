@@ -1,5 +1,6 @@
 import React from "react";
 import { PortfolioConfig } from "../../types";
+import { sampleUnsplashPresets } from "../../defaultData";
 
 interface GalleryPhotoFormProps {
   config: PortfolioConfig;
@@ -10,6 +11,8 @@ interface GalleryPhotoFormProps {
   setNewPhotoTitle: (v: string) => void;
   newPhotoDesc: string;
   setNewPhotoDesc: (v: string) => void;
+  newPhotoDate: string;
+  setNewPhotoDate: (v: string) => void;
   newPhotoCategory: string;
   setNewPhotoCategory: (v: string) => void;
   newPhotoCamera: string;
@@ -24,7 +27,6 @@ interface GalleryPhotoFormProps {
   setNewPhotoSuggested?: (v: string) => void;
   resetForm: () => void;
   handleAddPhotoSubmit: (e: React.FormEvent) => void;
-  sampleUnsplashPresets: { label: string; url: string; cat: string }[];
   onUpdateConfig?: (config: PortfolioConfig) => void;
 }
 
@@ -37,6 +39,8 @@ export default function GalleryPhotoForm({
   setNewPhotoTitle,
   newPhotoDesc,
   setNewPhotoDesc,
+  newPhotoDate,
+  setNewPhotoDate,
   newPhotoCategory,
   setNewPhotoCategory,
   newPhotoCamera,
@@ -51,7 +55,6 @@ export default function GalleryPhotoForm({
   setNewPhotoSuggested,
   resetForm,
   handleAddPhotoSubmit,
-  sampleUnsplashPresets,
   onUpdateConfig
 }: GalleryPhotoFormProps) {
   const [inlineNewCategory, setInlineNewCategory] = React.useState("");
@@ -113,18 +116,33 @@ export default function GalleryPhotoForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs uppercase tracking-wider font-mono font-medium text-stone-500 mb-1">
-            Título de la Foto *
-          </label>
-          <input
-            type="text"
-            required
-            value={newPhotoTitle}
-            onChange={(e) => setNewPhotoTitle(e.target.value)}
-            placeholder="Ej. Sombra de Otoño"
-            className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
-          />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs uppercase tracking-wider font-mono font-medium text-stone-500 mb-1">
+              Título de la Foto *
+            </label>
+            <input
+              type="text"
+              required
+              value={newPhotoTitle}
+              onChange={(e) => setNewPhotoTitle(e.target.value)}
+              placeholder="Ej. Sombra de Otoño"
+              className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-xs uppercase tracking-wider font-mono font-medium text-stone-500 mb-1">
+              Fecha de Captura/Subida
+            </label>
+            <input
+              type="date"
+              required
+              value={newPhotoDate}
+              onChange={(e) => setNewPhotoDate(e.target.value)}
+              className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
+            />
+          </div>
         </div>
 
         <div>

@@ -13,6 +13,7 @@ import {
 import { Photo, PublicComment } from "../../types";
 import { getLocalizedText } from "../../defaultData";
 import { addPublicComment } from "../../utils/supabase";
+import { track } from '@vercel/analytics';
 
 interface ClientSlideshowProps {
   isOpen: boolean;
@@ -43,11 +44,27 @@ export default function ClientSlideshow({
   const [newCommentText, setNewCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCommentSuccess, setShowCommentSuccess] = useState(false);
+  const [zoomText, setZoomText] = useState(false); // Font zoom toggle
 
-  // Reset current index when startIndex changes
+  // Reset current index when startIndex changes, and track view
   useEffect(() => {
     setCurrentSlideIndex(startIndex);
-  }, [startIndex]);
+    if (photos[startIndex]) {
+      track('photo_viewed', { 
+        title: photos[startIndex].title,
+        category: photos[startIndex].category || 'none'
+      });
+    }
+  }, [startIndex, photos]);
+
+  useEffect(() => {
+    if (isOpen && photos[currentSlideIndex]) {
+      track('photo_viewed', { 
+        title: photos[currentSlideIndex].title,
+        category: photos[currentSlideIndex].category || 'none'
+      });
+    }
+  }, [currentSlideIndex, isOpen]);
 
   const handleNextSlide = () => {
     if (photos.length === 0) return;
@@ -329,7 +346,7 @@ export default function ClientSlideshow({
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-stone-400 animate-pulse" />
                   <span className="text-[9.5px] uppercase font-mono font-extrabold text-stone-400 tracking-widest">
-                    {lang === "es" ? "Análisis Curatorial (IA Gemini)" : "Curatorial Review (Gemini AI)"}
+                    {lang === "es" ? "Análisis Curatorial (Nodo Ai Agency)" : "Curatorial Review (Nodo Ai Agency)"}
                   </span>
                 </div>
                 <p className="text-xs text-stone-300 leading-relaxed italic">
@@ -339,20 +356,29 @@ export default function ClientSlideshow({
             )}
 
             {/* Public Comments List */}
-            <div className="bg-stone-900/40 border border-stone-850 rounded-xl p-4 flex flex-col gap-4 max-h-[200px] overflow-y-auto custom-scrollbar">
-              <h4 className="text-xs font-mono tracking-widest text-stone-400 uppercase">
-                {lang === "es" ? `Comentarios (${currentPhotoComments.length})` : `Comments (${currentPhotoComments.length})`}
-              </h4>
+            <div className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 flex flex-col gap-4 max-h-[250px] overflow-y-auto custom-scrollbar shadow-xl`}>
+              <div className="flex justify-between items-center">
+                <h4 className="text-xs font-mono tracking-widest text-stone-300 uppercase">
+                  {lang === "es" ? `Comentarios (${currentPhotoComments.length})` : `Comments (${currentPhotoComments.length})`}
+                </h4>
+                <button 
+                  onClick={() => setZoomText(!zoomText)}
+                  className="p-1 hover:bg-white/10 rounded transition text-stone-300 cursor-pointer"
+                  title="Ampliar Texto"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {currentPhotoComments.map((c) => (
-                  <div key={c.id} className="text-xs text-stone-300">
-                    <p className="font-bold text-stone-200">{c.authorName}</p>
-                    <p className="italic text-stone-400">"{c.text}"</p>
+                  <div key={c.id} className={`${zoomText ? 'text-base' : 'text-sm'} text-stone-200`}>
+                    <p className="font-bold text-white drop-shadow-sm">{c.authorName}</p>
+                    <p className="italic text-stone-300 mt-1 drop-shadow-sm">"{c.text}"</p>
                   </div>
                 ))}
                 {currentPhotoComments.length === 0 && (
-                  <p className="text-xs text-stone-600 italic">
+                  <p className={`${zoomText ? 'text-sm' : 'text-xs'} text-stone-400 italic`}>
                     {lang === "es" ? "Sé el primero en dejar un comentario." : "Be the first to leave a comment."}
                   </p>
                 )}
@@ -371,7 +397,7 @@ export default function ClientSlideshow({
                       placeholder={lang === "es" ? "Tu Nombre (Opcional Anónimo)" : "Your Name"}
                       value={newCommentName}
                       onChange={(e) => setNewCommentName(e.target.value)}
-                      className="w-full bg-stone-950 border border-stone-800 rounded p-1.5 text-xs text-stone-200 outline-none focus:border-stone-600"
+                      className="w-full bg-black/40 border border-white/20 backdrop-blur-sm rounded-lg p-2 text-sm text-white outline-none focus:border-white/50 placeholder:text-stone-500 transition-colors"
                       required
                     />
                     <div className="flex gap-2">
@@ -380,7 +406,7 @@ export default function ClientSlideshow({
                         placeholder={lang === "es" ? "Deja una apreciación..." : "Leave an appreciation..."}
                         value={newCommentText}
                         onChange={(e) => setNewCommentText(e.target.value)}
-                        className="flex-1 bg-stone-950 border border-stone-800 rounded p-1.5 text-xs text-stone-200 outline-none focus:border-stone-600"
+                        className="flex-1 bg-black/40 border border-white/20 backdrop-blur-sm rounded-lg p-2 text-sm text-white outline-none focus:border-white/50 placeholder:text-stone-500 transition-colors"
                         required
                       />
                       <button 

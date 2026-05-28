@@ -1,5 +1,12 @@
 import { Photo, PortfolioConfig, ClientReviewSession } from "./types";
 
+export const sampleUnsplashPresets = [
+  { label: "Moda Étnica", url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1200", cat: "Moda y Editorial | Fashion & Editorial" },
+  { label: "Retrato Melancólico", url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200", cat: "Retrato | Portrait" },
+  { label: "Espacio Minimalista", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200", cat: "Paisaje | Landscape" },
+  { label: "Boda Atardecer", url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200", cat: "Casamiento y Evento | Wedding & Event" }
+];
+
 export const DEFAULT_CONFIG: PortfolioConfig = {
   photographerName: "Christian Rotger",
   title: "Wild Earth Exposition | Exposición Tierra Salvaje",

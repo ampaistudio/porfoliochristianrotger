@@ -16,9 +16,16 @@ import { Photo, PortfolioConfig, ClientReviewSession, PublicComment } from '../t
 import { DEFAULT_CONFIG } from '../defaultData';
 
 export async function fetchPhotos(): Promise<Photo[]> {
-  const { data, error } = await supabase.from('photos').select('*').order('created_at', { ascending: false });
+  const { data, error } = await supabase.from('photos').select('*')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
   if (error) console.error("Error fetching photos:", error);
-  return data || [];
+  return (data || []).map((p: any) => ({
+    ...p,
+    sortOrder: p.sort_order,
+    editorialReview: p.editorialReview,
+    suggestedSettings: p.suggestedSettings
+  }));
 }
 
 export async function fetchConfig(): Promise<PortfolioConfig> {
@@ -52,7 +59,13 @@ export async function fetchReviews(): Promise<ClientReviewSession[]> {
 }
 
 export async function savePhotoToSupabase(photo: Photo) {
-  return await supabase.from('photos').upsert([photo]);
+  const payload = {
+    ...photo,
+    sort_order: photo.sortOrder || 0
+  };
+  // @ts-ignore
+  delete payload.sortOrder;
+  return await supabase.from('photos').upsert([payload]);
 }
 
 export async function deletePhotoFromSupabase(id: string) {

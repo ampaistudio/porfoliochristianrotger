@@ -22,6 +22,7 @@ export default function DashboardGallery({
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [newPhotoTitle, setNewPhotoTitle] = useState("");
   const [newPhotoDesc, setNewPhotoDesc] = useState("");
+  const [newPhotoDate, setNewPhotoDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [newPhotoCategory, setNewPhotoCategory] = useState(() => config.categories?.[0] || "Vida Silvestre | Wildlife");
   const [newPhotoCamera, setNewPhotoCamera] = useState("Sony Alpha 7R V");
   const [newPhotoLens, setNewPhotoLens] = useState("FE 85mm f/1.4 GM");
@@ -36,24 +37,15 @@ export default function DashboardGallery({
     fileName: string;
   } | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
+  const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Curated Preset Unsplash Links for Quick Setup
-  const sampleUnsplashPresets = [
-    { label: "Moda Étnica", url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1200", cat: "Moda y Editorial | Fashion & Editorial" },
-    { label: "Retrato Melancólico", url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200", cat: "Retrato | Portrait" },
-    { label: "Espacio Minimalista", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200", cat: "Paisaje | Landscape" },
-    { label: "Boda Atardecer", url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200", cat: "Casamiento y Evento | Wedding & Event" }
-  ];
+
   const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    e.preventDefault(); e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    else if (e.type === "dragleave") setDragActive(false);
   };
 
   const handleMultipleFiles = async (fileList: FileList | File[]) => {
@@ -84,11 +76,7 @@ export default function DashboardGallery({
       
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
-        setBatchUploadStatus({
-          current: i + 1,
-          total: validFiles.length,
-          fileName: file.name
-        });
+        setBatchUploadStatus({ current: i + 1, total: validFiles.length, fileName: file.name });
 
         try {
           const meta = await extractExifMetadata(file);
@@ -203,7 +191,7 @@ export default function DashboardGallery({
         title: newPhotoTitle,
         description: newPhotoDesc,
         category: newPhotoCategory,
-        date: photos.find(p => p.id === editingPhotoId)?.date || new Date().toISOString().split("T")[0],
+        date: newPhotoDate,
         camera: newPhotoCamera,
         lens: newPhotoLens,
         settings: newPhotoSettings,
@@ -228,7 +216,7 @@ export default function DashboardGallery({
         title: newPhotoTitle,
         description: newPhotoDesc,
         category: newPhotoCategory,
-        date: new Date().toISOString().split("T")[0],
+        date: newPhotoDate || new Date().toISOString().split("T")[0],
         camera: newPhotoCamera,
         lens: newPhotoLens,
         settings: newPhotoSettings,
@@ -246,6 +234,7 @@ export default function DashboardGallery({
     setNewPhotoUrl("");
     setNewPhotoTitle("");
     setNewPhotoDesc("");
+    setNewPhotoDate(new Date().toISOString().split("T")[0]);
     setNewPhotoCategory(config.categories?.[0] || "Vida Silvestre | Wildlife");
     setNewPhotoCamera("Sony Alpha 7R V");
     setNewPhotoLens("FE 85mm f/1.4 GM");
@@ -259,6 +248,21 @@ export default function DashboardGallery({
   const handleDeletePhoto = async (id: string) => {
     await deletePhotoFromSupabase(id);
     onUpdatePhotos(photos.filter(p => p.id !== id));
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => { setDraggedPhotoId(id); e.dataTransfer.effectAllowed = "move"; };
+  const handleDropPhoto = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedPhotoId || draggedPhotoId === targetId) return;
+    const oldIndex = photos.findIndex(p => p.id === draggedPhotoId);
+    const newIndex = photos.findIndex(p => p.id === targetId);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const newPhotos = [...photos];
+    const [draggedItem] = newPhotos.splice(oldIndex, 1);
+    newPhotos.splice(newIndex, 0, draggedItem);
+    const updated = newPhotos.map((p, i) => ({ ...p, sortOrder: i }));
+    onUpdatePhotos(updated);
+    for (const p of updated) await savePhotoToSupabase(p);
   };
 
   return (
@@ -386,6 +390,8 @@ export default function DashboardGallery({
             setNewPhotoTitle={setNewPhotoTitle}
             newPhotoDesc={newPhotoDesc}
             setNewPhotoDesc={setNewPhotoDesc}
+            newPhotoDate={newPhotoDate}
+            setNewPhotoDate={setNewPhotoDate}
             newPhotoCategory={newPhotoCategory}
             setNewPhotoCategory={setNewPhotoCategory}
             newPhotoCamera={newPhotoCamera}
@@ -400,7 +406,6 @@ export default function DashboardGallery({
             setNewPhotoSuggested={setNewPhotoSuggested}
             resetForm={resetForm}
             handleAddPhotoSubmit={handleAddPhotoSubmit}
-            sampleUnsplashPresets={sampleUnsplashPresets}
             onUpdateConfig={onUpdateConfig}
           />
         </div>
@@ -411,7 +416,11 @@ export default function DashboardGallery({
         {photos.map((photo) => (
           <div 
             key={photo.id} 
-            className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition flex flex-col justify-between"
+            draggable
+            onDragStart={(e) => handleDragStart(e, photo.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDropPhoto(e, photo.id)}
+            className="bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition flex flex-col justify-between cursor-move"
           >
             <div className="aspect-[4/3] bg-stone-100 relative overflow-hidden group">
               <img
@@ -432,6 +441,7 @@ export default function DashboardGallery({
                     setNewPhotoUrl(photo.url);
                     setNewPhotoTitle(photo.title);
                     setNewPhotoDesc(photo.description || "");
+                    setNewPhotoDate(photo.date || new Date().toISOString().split("T")[0]);
                     setNewPhotoCategory(photo.category || config.categories?.[0] || "");
                     setNewPhotoCamera(photo.camera || "");
                     setNewPhotoLens(photo.lens || "");
@@ -444,14 +454,7 @@ export default function DashboardGallery({
                 >
                   <Pencil className="w-3.5 h-3.5" /> Editar
                 </button>
-                <button
-                  onClick={() => {
-                    if (confirm("¿Estás seguro de que deseas eliminar esta fotografía del portafolio?")) {
-                      handleDeletePhoto(photo.id);
-                    }
-                  }}
-                  className="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
-                >
+                <button onClick={() => { if (confirm("¿Eliminar?")) handleDeletePhoto(photo.id); }} className="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer">
                   <Trash2 className="w-3.5 h-3.5" /> Eliminar
                 </button>
               </div>

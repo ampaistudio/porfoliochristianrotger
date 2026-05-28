@@ -2,14 +2,15 @@ export interface Photo {
   id: string;
   url: string;
   title: string;
-  description: string;
-  category: string;
+  description?: string;
+  category?: string;
   date: string;
-  lens?: string;
   camera?: string;
-  settings?: string; // e.g., "f/1.8, 1/200s, ISO 400"
+  lens?: string;
+  settings?: string;
   editorialReview?: string;
   suggestedSettings?: string;
+  sortOrder?: number;
 }
 export interface PublicComment {
   id?: string;
