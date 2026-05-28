@@ -39,8 +39,3 @@ export interface PortfolioConfig {
   brandColor: string; // Tailwind accent or hex hex color code
 }
 
-export interface AICaptionResponse {
-  caption: string;
-  editorialReview: string;
-  suggestedSettings: string;
-}

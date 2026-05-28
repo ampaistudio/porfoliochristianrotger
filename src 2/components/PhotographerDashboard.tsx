@@ -16,14 +16,12 @@ import {
   Twitter,
   ExternalLink,
   MessageSquare,
-  Sparkles,
   Upload,
   Pencil,
   Download,
   Database
 } from "lucide-react";
-import { Photo, PortfolioConfig, ClientReviewSession, AICaptionResponse } from "../types";
-import AICaptionHelper from "./AICaptionHelper";
+import { Photo, PortfolioConfig, ClientReviewSession } from "../types";
 import ExifReader from "exifreader";
 
 // Función helper para redimensionar y comprimir imágenes (reduce archivos MB a ~60-100KB)
@@ -112,7 +110,7 @@ export default function PhotographerDashboard({
   googleClientId = "",
   onUpdateGoogleClientId,
 }: PhotographerDashboardProps) {
-  const [activeTab, setActiveTab] = useState<"gallery" | "settings" | "reviews" | "ai-helper">("gallery");
+  const [activeTab, setActiveTab] = useState<"gallery" | "settings" | "reviews">("gallery");
   const [backupMessage, setBackupMessage] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
   
   // Photo Form State
@@ -625,15 +623,6 @@ export default function PhotographerDashboard({
     onUpdatePhotos(photos.filter(p => p.id !== id));
   };
 
-  const applyAICaption = (data: AICaptionResponse) => {
-    setNewPhotoDesc(data.caption);
-    setNewPhotoEditorial(data.editorialReview);
-    setNewPhotoSuggested(data.suggestedSettings);
-    // Switch active tab in form if helper was opened
-    setActiveTab("gallery");
-    setShowAddForm(true);
-  };
-
   const copyClientLink = () => {
     navigator.clipboard.writeText(clientLinkUrl);
     setCopiedLink(true);
@@ -724,18 +713,6 @@ export default function PhotographerDashboard({
           }`}
         >
           🗃️ Galería & Fotos ({photos.length})
-        </button>
-
-        <button
-          onClick={() => { setActiveTab("ai-helper"); }}
-          className={`px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition flex items-center gap-1.5 ${
-            activeTab === "ai-helper" 
-              ? "border-amber-600 text-stone-900" 
-              : "border-transparent text-stone-500 hover:text-stone-800"
-          }`}
-        >
-          <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-          Redactar con IA (Gemini)
         </button>
 
         <button
@@ -989,9 +966,6 @@ export default function PhotographerDashboard({
                     className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
                   />
                   <div className="mt-1 flex justify-between">
-                    <span className="text-[10.5px] text-stone-500">
-                      Consejo: Puedes usar el <strong>Asistente IA</strong> en la pestaña superior para redactar esta descripción automáticamente.
-                    </span>
                   </div>
                 </div>
 
@@ -1173,16 +1147,6 @@ export default function PhotographerDashboard({
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* AI CAPTION ASSISTANT TAB */}
-      {activeTab === "ai-helper" && (
-        <div className="max-w-3xl mx-auto">
-          <AICaptionHelper 
-            onApply={applyAICaption}
-            brandColor={config.brandColor}
-          />
         </div>
       )}
 
