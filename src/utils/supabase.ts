@@ -25,7 +25,6 @@ export async function fetchPhotos(): Promise<Photo[]> {
     sortOrder: p.sort_order,
     editorialReview: p.editorialReview,
     suggestedSettings: p.suggestedSettings,
-    status: p.status || 'published',
     title_es: p.title_es,
     description_es: p.description_es,
     editorialReview_es: p.editorialReview_es,
@@ -67,7 +66,6 @@ export async function savePhotoToSupabase(photo: Photo) {
   const payload = {
     ...photo,
     sort_order: photo.sortOrder || 0,
-    status: photo.status || 'published',
     title_es: photo.title_es,
     description_es: photo.description_es,
     editorialReview_es: photo.editorialReview_es,
