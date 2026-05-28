@@ -29,7 +29,9 @@ export default function ClientPortfolioView({
   // Lang state, initialized from localStorage fallback
   const [lang, setLang] = useState<"es" | "en">(() => {
     const saved = localStorage.getItem("portfolio_lang");
-    return (saved === "es" || saved === "en") ? saved : "es";
+    if (saved === "es" || saved === "en") return saved;
+    // Default to 'en'
+    return "en";
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string>("Todas");

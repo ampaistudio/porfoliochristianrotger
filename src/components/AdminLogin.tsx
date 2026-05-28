@@ -11,7 +11,7 @@ interface AdminLoginProps {
 
 export default function AdminLogin({
   onLoginSuccess,
-  lang = "es",
+  lang = "en",
   authorizedEmails,
   correctPasswordHash,
 }: AdminLoginProps) {
