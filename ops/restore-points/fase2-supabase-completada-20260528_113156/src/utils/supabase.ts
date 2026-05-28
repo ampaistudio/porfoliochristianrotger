@@ -27,14 +27,7 @@ export async function fetchConfig(): Promise<PortfolioConfig> {
     console.error("Error fetching config:", error);
     return DEFAULT_CONFIG;
   }
-  
-  if (data) {
-    // Recuperar las categorías base y fusionarlas con las personalizadas para no perderlas
-    const mergedCategories = Array.from(new Set([...(DEFAULT_CONFIG.categories || []), ...(data.categories || [])]));
-    return { ...data, categories: mergedCategories };
-  }
-  
-  return DEFAULT_CONFIG;
+  return data || DEFAULT_CONFIG;
 }
 
 export async function fetchReviews(): Promise<ClientReviewSession[]> {

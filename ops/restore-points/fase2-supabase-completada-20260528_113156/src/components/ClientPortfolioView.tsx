@@ -78,7 +78,7 @@ export default function ClientPortfolioView({
     <div className="bg-[#09090b] min-h-screen text-stone-100 font-sans pb-4 transition-colors duration-200 selection:bg-stone-800 selection:text-white">
       
       {/* Cinematic Minimalist Brand Header */}
-      <header className="border-b bg-black/80 backdrop-blur sticky top-0 z-40" style={{ borderColor: brandColor }}>
+      <header className="border-b border-stone-900 bg-black/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           <div>
             <span className="text-[10px] font-mono tracking-[0.25em] text-stone-500 block uppercase font-bold">
@@ -125,7 +125,7 @@ export default function ClientPortfolioView({
       </header>
 
       {/* Hero Bio Banner Area */}
-      <section className="relative overflow-hidden py-16 sm:py-20 border-b bg-gradient-to-b from-black to-stone-950 px-4" style={{ borderColor: brandColor }}>
+      <section className="relative overflow-hidden py-16 sm:py-20 border-b border-stone-900 bg-gradient-to-b from-black to-stone-950 px-4">
         {backgroundMeshEffect()}
 
         <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10 animate-fadeIn">

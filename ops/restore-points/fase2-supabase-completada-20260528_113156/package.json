@@ -9,8 +9,7 @@
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "restore:point": "node scripts/restore-point.js",
-    "prepare": "husky"
+    "restore:point": "node scripts/restore-point.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
@@ -31,8 +30,6 @@
     "@vercel/node": "^5.8.6",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
