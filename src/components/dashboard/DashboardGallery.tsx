@@ -19,14 +19,14 @@ interface DashboardGalleryProps {
   photos: Photo[];
   onUpdatePhotos: (photos: Photo[]) => void;
   config: PortfolioConfig;
+  onUpdateConfig: (config: PortfolioConfig) => void;
 }
-
 export default function DashboardGallery({
   photos,
   onUpdatePhotos,
   config,
+  onUpdateConfig,
 }: DashboardGalleryProps) {
-  // Photo Form State
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [newPhotoTitle, setNewPhotoTitle] = useState("");
@@ -45,8 +45,6 @@ export default function DashboardGallery({
     fileName: string;
   } | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
-
-  // Drag and Drop File state
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,7 +55,6 @@ export default function DashboardGallery({
     { label: "Espacio Minimalista", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200", cat: "Paisaje | Landscape" },
     { label: "Boda Atardecer", url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200", cat: "Casamiento y Evento | Wedding & Event" }
   ];
-
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -410,6 +407,7 @@ export default function DashboardGallery({
             resetForm={resetForm}
             handleAddPhotoSubmit={handleAddPhotoSubmit}
             sampleUnsplashPresets={sampleUnsplashPresets}
+            onUpdateConfig={onUpdateConfig}
           />
         </div>
       )}

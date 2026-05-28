@@ -10,8 +10,9 @@ import {
   Minimize2, 
   Sparkles 
 } from "lucide-react";
-import { Photo } from "../../types";
+import { Photo, PublicComment } from "../../types";
 import { getLocalizedText } from "../../defaultData";
+import { addPublicComment } from "../../utils/supabase";
 
 interface ClientSlideshowProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ interface ClientSlideshowProps {
   photos: Photo[];
   startIndex: number;
   lang: "es" | "en";
+  publicComments: PublicComment[];
+  brandColor: string;
 }
 
 export default function ClientSlideshow({
@@ -27,11 +30,19 @@ export default function ClientSlideshow({
   photos,
   startIndex,
   lang,
+  publicComments,
+  brandColor,
 }: ClientSlideshowProps) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(startIndex);
   const [isAutoplayRunning, setIsAutoplayRunning] = useState(false);
   const [isImmersiveTheater, setIsImmersiveTheater] = useState(false);
   const [imageFit, setImageFit] = useState<"contain" | "cover">("cover");
+
+  // Comments State
+  const [newCommentName, setNewCommentName] = useState("");
+  const [newCommentText, setNewCommentText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCommentSuccess, setShowCommentSuccess] = useState(false);
 
   // Reset current index when startIndex changes
   useEffect(() => {
@@ -87,8 +98,27 @@ export default function ClientSlideshow({
     onClose();
   };
 
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCommentName.trim() || !newCommentText.trim() || !activePhoto) return;
+    setIsSubmitting(true);
+    await addPublicComment({
+      photoId: activePhoto.id,
+      authorName: newCommentName,
+      text: newCommentText,
+      isApproved: false // Pendiente de moderación
+    });
+    setIsSubmitting(false);
+    setNewCommentName("");
+    setNewCommentText("");
+    setShowCommentSuccess(true);
+    setTimeout(() => setShowCommentSuccess(false), 5000);
+  };
+
   const activePhoto = photos[currentSlideIndex];
   if (!activePhoto) return null;
+
+  const currentPhotoComments = publicComments.filter(c => c.photoId === activePhoto.id && c.isApproved);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#040405] text-white flex flex-col justify-between select-none animate-fadeIn">
@@ -212,15 +242,22 @@ export default function ClientSlideshow({
             ? "absolute inset-0 w-screen h-screen max-w-full max-h-full" 
             : "w-full h-full max-w-4xl max-h-[62vh]"
         }`}>
+          {/* Protección Anti-Robo */}
+          <div 
+            className="absolute inset-0 z-10 select-none bg-transparent"
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
+          />
           <img
             src={activePhoto.url}
             alt={getLocalizedText(activePhoto.title, lang)}
-            className={`transition-all duration-500 animate-fadeIn ${
+            className={`transition-all duration-500 animate-fadeIn pointer-events-none select-none ${
               imageFit === "cover" && isImmersiveTheater
                 ? "w-full h-full object-cover" 
                 : "max-h-full max-w-full object-contain rounded shadow-2xl"
             }`}
             referrerPolicy="no-referrer"
+            onContextMenu={(e) => e.preventDefault()}
           />
 
           {/* Elegant and subtle digital watermark overlaid directly inside image container */}
@@ -284,25 +321,83 @@ export default function ClientSlideshow({
             )}
           </div>
 
-          {/* AI Curated Commentary on the Right if available */}
-          {activePhoto.editorialReview && (
-            <div className="max-w-md bg-stone-900/50 border border-stone-800/65 rounded-xl p-4 space-y-2 shrink-0 self-stretch md:self-auto flex flex-col justify-center">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-stone-400 animate-pulse" />
-                <span className="text-[9.5px] uppercase font-mono font-extrabold text-stone-400 tracking-widest">
-                  {lang === "es" ? "Análisis Curatorial (IA Gemini)" : "Curatorial Review (Gemini AI)"}
-                </span>
-              </div>
-              <p className="text-xs text-stone-300 leading-relaxed italic">
-                "{getLocalizedText(activePhoto.editorialReview, lang)}"
-              </p>
-              {activePhoto.suggestedSettings && (
-                <p className="text-[10px] text-stone-500 leading-relaxed max-w-sm truncate" title={getLocalizedText(activePhoto.suggestedSettings, lang)}>
-                   💡 {getLocalizedText(activePhoto.suggestedSettings, lang)}
+          {/* AI Curated Commentary & Public Comments */}
+          <div className="w-full md:w-[400px] flex flex-col gap-4 shrink-0">
+            
+            {activePhoto.editorialReview && (
+              <div className="bg-stone-900/50 border border-stone-800/65 rounded-xl p-4 space-y-2 flex flex-col justify-center">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-stone-400 animate-pulse" />
+                  <span className="text-[9.5px] uppercase font-mono font-extrabold text-stone-400 tracking-widest">
+                    {lang === "es" ? "Análisis Curatorial (IA Gemini)" : "Curatorial Review (Gemini AI)"}
+                  </span>
+                </div>
+                <p className="text-xs text-stone-300 leading-relaxed italic">
+                  "{getLocalizedText(activePhoto.editorialReview, lang)}"
                 </p>
-              )}
+              </div>
+            )}
+
+            {/* Public Comments List */}
+            <div className="bg-stone-900/40 border border-stone-850 rounded-xl p-4 flex flex-col gap-4 max-h-[200px] overflow-y-auto custom-scrollbar">
+              <h4 className="text-xs font-mono tracking-widest text-stone-400 uppercase">
+                {lang === "es" ? `Comentarios (${currentPhotoComments.length})` : `Comments (${currentPhotoComments.length})`}
+              </h4>
+              
+              <div className="space-y-3">
+                {currentPhotoComments.map((c) => (
+                  <div key={c.id} className="text-xs text-stone-300">
+                    <p className="font-bold text-stone-200">{c.authorName}</p>
+                    <p className="italic text-stone-400">"{c.text}"</p>
+                  </div>
+                ))}
+                {currentPhotoComments.length === 0 && (
+                  <p className="text-xs text-stone-600 italic">
+                    {lang === "es" ? "Sé el primero en dejar un comentario." : "Be the first to leave a comment."}
+                  </p>
+                )}
+              </div>
+
+              {/* Add Comment Form */}
+              <form onSubmit={handleCommentSubmit} className="mt-2 pt-3 border-t border-stone-800 space-y-2">
+                {showCommentSuccess ? (
+                  <p className="text-xs text-emerald-400 font-mono">
+                    {lang === "es" ? "✅ Enviado. Pendiente de moderación." : "✅ Submitted. Pending moderation."}
+                  </p>
+                ) : (
+                  <>
+                    <input 
+                      type="text" 
+                      placeholder={lang === "es" ? "Tu Nombre (Opcional Anónimo)" : "Your Name"}
+                      value={newCommentName}
+                      onChange={(e) => setNewCommentName(e.target.value)}
+                      className="w-full bg-stone-950 border border-stone-800 rounded p-1.5 text-xs text-stone-200 outline-none focus:border-stone-600"
+                      required
+                    />
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder={lang === "es" ? "Deja una apreciación..." : "Leave an appreciation..."}
+                        value={newCommentText}
+                        onChange={(e) => setNewCommentText(e.target.value)}
+                        className="flex-1 bg-stone-950 border border-stone-800 rounded p-1.5 text-xs text-stone-200 outline-none focus:border-stone-600"
+                        required
+                      />
+                      <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        style={{ backgroundColor: brandColor }}
+                        className="px-3 rounded text-[10px] font-bold text-white uppercase hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                      >
+                        {lang === "es" ? "Enviar" : "Send"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </form>
             </div>
-          )}
+            
+          </div>
         </footer>
       )}
     </div>

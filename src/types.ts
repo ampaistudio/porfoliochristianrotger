@@ -11,6 +11,14 @@ export interface Photo {
   editorialReview?: string;
   suggestedSettings?: string;
 }
+export interface PublicComment {
+  id?: string;
+  photoId: string;
+  authorName: string;
+  text: string;
+  isApproved: boolean;
+  createdAt: string;
+}
 
 export interface ClientFeedback {
   photoId: string;

@@ -22,6 +22,7 @@ interface GalleryPhotoFormProps {
   resetForm: () => void;
   handleAddPhotoSubmit: (e: React.FormEvent) => void;
   sampleUnsplashPresets: { label: string; url: string; cat: string }[];
+  onUpdateConfig?: (config: PortfolioConfig) => void;
 }
 
 export default function GalleryPhotoForm({
@@ -44,8 +45,28 @@ export default function GalleryPhotoForm({
   newPhotoEditorial,
   resetForm,
   handleAddPhotoSubmit,
-  sampleUnsplashPresets
+  sampleUnsplashPresets,
+  onUpdateConfig
 }: GalleryPhotoFormProps) {
+  const [inlineNewCategory, setInlineNewCategory] = React.useState("");
+
+  const handleInlineAddCategory = () => {
+    if (!inlineNewCategory.trim() || !onUpdateConfig) return;
+    const currentCats = config.categories || [];
+    if (!currentCats.includes(inlineNewCategory.trim())) {
+      onUpdateConfig({
+        ...config,
+        categories: [...currentCats, inlineNewCategory.trim()]
+      });
+    }
+    // Auto-select it
+    const updatedSelected = newPhotoCategory ? newPhotoCategory.split(", ") : [];
+    if (!updatedSelected.includes(inlineNewCategory.trim())) {
+      updatedSelected.push(inlineNewCategory.trim());
+      setNewPhotoCategory(updatedSelected.join(", "));
+    }
+    setInlineNewCategory("");
+  };
   return (
     <form onSubmit={handleAddPhotoSubmit} className="space-y-4">
       {/* Standard Fallback Input URL */}
@@ -143,6 +164,25 @@ export default function GalleryPhotoForm({
               );
             })}
           </div>
+          {onUpdateConfig && (
+            <div className="flex gap-2 mt-2">
+              <input
+                type="text"
+                placeholder="Nueva categoría (ej. Bodas | Weddings)"
+                value={inlineNewCategory}
+                onChange={(e) => setInlineNewCategory(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleInlineAddCategory(); } }}
+                className="flex-1 text-xs bg-white border border-stone-200 rounded-lg p-2 outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleInlineAddCategory}
+                className="px-3 py-2 bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-semibold rounded-lg transition"
+              >
+                + Añadir
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

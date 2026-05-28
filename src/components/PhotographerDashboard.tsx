@@ -4,7 +4,7 @@ import {
   ExternalLink,
   Settings
 } from "lucide-react";
-import { Photo, PortfolioConfig, ClientReviewSession } from "../types";
+import { Photo, PortfolioConfig, PublicComment, ClientReviewSession } from "../types";
 import DashboardGallery from "./dashboard/DashboardGallery";
 import DashboardReviews from "./dashboard/DashboardReviews";
 import DashboardSettings from "./dashboard/DashboardSettings";
@@ -14,11 +14,10 @@ interface PhotographerDashboardProps {
   onUpdatePhotos: (photos: Photo[]) => void;
   config: PortfolioConfig;
   onUpdateConfig: (config: PortfolioConfig) => void;
-  reviews: ClientReviewSession[];
-  onClearReviews: () => void;
+  publicComments: PublicComment[];
   onSimulateClientView: () => void;
   clientLinkUrl: string;
-  onImportAllData?: (photos: Photo[], config: PortfolioConfig, reviews: ClientReviewSession[]) => void;
+  onImportAllData?: (photos: Photo[], config: PortfolioConfig) => void;
   adminPassword?: string;
   onUpdateAdminPassword?: (pwd: string) => void;
   authorizedEmails?: string[];
@@ -32,8 +31,7 @@ export default function PhotographerDashboard({
   onUpdatePhotos,
   config,
   onUpdateConfig,
-  reviews,
-  onClearReviews,
+  publicComments,
   onSimulateClientView,
   clientLinkUrl,
   onImportAllData,
@@ -48,8 +46,8 @@ export default function PhotographerDashboard({
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Calculations for Stats
-  const approvedTotalCount = reviews.reduce((sum, r) => sum + r.feedbacks.filter(f => f.approved).length, 0);
-  const reviewedTotalCount = reviews.reduce((sum, r) => sum + r.feedbacks.length, 0);
+  const approvedTotalCount = publicComments.filter(c => c.isApproved).length;
+  const reviewedTotalCount = publicComments.length;
   const approvalPercent = reviewedTotalCount > 0 ? Math.round((approvedTotalCount / reviewedTotalCount) * 100) : 100;
 
   const copyClientLink = () => {
@@ -107,18 +105,18 @@ export default function PhotographerDashboard({
         </div>
 
         <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
-          <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Revisiones de Clientes</div>
+          <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Comentarios Públicos</div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-stone-900">{reviews.length}</span>
-            <span className="text-xs text-stone-500">sesiones</span>
+            <span className="text-3xl font-semibold text-stone-900">{publicComments.length}</span>
+            <span className="text-xs text-stone-500">recibidos</span>
           </div>
         </div>
 
         <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
-          <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Aprobación de Fotos</div>
+          <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Tasa de Aprobación</div>
           <div className="flex items-baseline gap-2 col-span-1">
             <span className="text-3xl font-semibold text-stone-900">{approvalPercent}%</span>
-            <span className="text-xs text-emerald-600 font-medium font-mono">+{approvedTotalCount} aprobadas</span>
+            <span className="text-xs text-emerald-600 font-medium font-mono">+{approvedTotalCount} públicos</span>
           </div>
         </div>
 
@@ -152,7 +150,7 @@ export default function PhotographerDashboard({
               : "border-transparent text-stone-500 hover:text-stone-800"
           }`}
         >
-          📩 Feedback de Clientes ({reviews.length})
+          📩 Feedback de Clientes ({publicComments.length})
         </button>
 
         <button
@@ -175,15 +173,15 @@ export default function PhotographerDashboard({
             photos={photos}
             onUpdatePhotos={onUpdatePhotos}
             config={config}
+            onUpdateConfig={onUpdateConfig}
           />
         )}
 
         {activeTab === "reviews" && (
           <DashboardReviews
-            reviews={reviews}
+            publicComments={publicComments}
             photos={photos}
             config={config}
-            onClearReviews={onClearReviews}
             onSimulateClientView={onSimulateClientView}
           />
         )}
@@ -193,7 +191,6 @@ export default function PhotographerDashboard({
             config={config}
             onUpdateConfig={onUpdateConfig}
             photos={photos}
-            reviews={reviews}
             onImportAllData={onImportAllData}
             adminPassword={adminPassword}
             onUpdateAdminPassword={onUpdateAdminPassword}

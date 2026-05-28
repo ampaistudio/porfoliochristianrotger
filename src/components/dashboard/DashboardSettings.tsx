@@ -11,15 +11,14 @@ import {
   Instagram,
   Twitter
 } from "lucide-react";
-import { Photo, PortfolioConfig, ClientReviewSession } from "../../types";
+import { Photo, PortfolioConfig } from "../../types";
 import SettingsSecurity from "./SettingsSecurity";
 
 interface DashboardSettingsProps {
   config: PortfolioConfig;
   onUpdateConfig: (config: PortfolioConfig) => void;
   photos: Photo[];
-  reviews: ClientReviewSession[];
-  onImportAllData?: (photos: Photo[], config: PortfolioConfig, reviews: ClientReviewSession[]) => void;
+  onImportAllData?: (photos: Photo[], config: PortfolioConfig) => void;
   adminPassword?: string;
   onUpdateAdminPassword?: (pwd: string) => void;
   authorizedEmails?: string[];
@@ -32,7 +31,6 @@ export default function DashboardSettings({
   config,
   onUpdateConfig,
   photos,
-  reviews,
   onImportAllData,
   adminPassword = "admin",
   onUpdateAdminPassword,
@@ -96,7 +94,6 @@ export default function DashboardSettings({
         exportDate: new Date().toISOString(),
         photos,
         config,
-        reviews,
       };
 
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -138,7 +135,6 @@ export default function DashboardSettings({
 
         const importedPhotos = parsed.photos;
         const importedConfig = parsed.config;
-        const importedReviews = parsed.reviews || [];
 
         if (!Array.isArray(importedPhotos)) {
           throw new Error("La copia de seguridad no contiene fotos válidas.");
@@ -149,7 +145,7 @@ export default function DashboardSettings({
         }
 
         if (onImportAllData) {
-          onImportAllData(importedPhotos, importedConfig, importedReviews);
+          onImportAllData(importedPhotos, importedConfig);
           setBackupMessage({
             text: `✨ ¡Restauración exitosa! Se cargaron ${importedPhotos.length} fotos y la configuración del perfil de "${importedConfig.photographerName}". Todos tus datos están seguros.`,
             type: "success"
@@ -365,7 +361,6 @@ export default function DashboardSettings({
             </div>
             <div className="flex gap-3 font-mono font-medium">
               <span>Fotos: {photos.length}</span>
-              <span>Feedback: {reviews.length}</span>
             </div>
           </div>
         </div>

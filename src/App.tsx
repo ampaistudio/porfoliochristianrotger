@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Photo, PortfolioConfig, ClientReviewSession, ClientFeedback } from "./types";
-import { DEFAULT_CONFIG, DEFAULT_PHOTOS, DEFAULT_CLIENT_REVIEWS } from "./defaultData";
-import { fetchPhotos, fetchConfig, fetchReviews, updateConfigInSupabase, insertReviewSessionInSupabase, deleteAllReviewsInSupabase } from "./utils/supabase";
+import { Photo, PortfolioConfig, PublicComment } from "./types";
+import { DEFAULT_CONFIG, DEFAULT_PHOTOS } from "./defaultData";
+import { fetchPhotos, fetchConfig, fetchPublicComments, updateConfigInSupabase, subscribeToPublicComments } from "./utils/supabase";
 import PhotographerDashboard from "./components/PhotographerDashboard";
 import ClientPortfolioView from "./components/ClientPortfolioView";
 import AdminLogin from "./components/AdminLogin";
@@ -12,7 +12,7 @@ export default function App() {
   const [photos, setPhotos] = useState<Photo[]>([]);
 
   const [config, setConfig] = useState<PortfolioConfig>(DEFAULT_CONFIG);
-  const [reviews, setReviews] = useState<ClientReviewSession[]>(DEFAULT_CLIENT_REVIEWS);
+  const [publicComments, setPublicComments] = useState<PublicComment[]>([]);
 
   // Current view mode: 'photographer' (admin panel) vs 'client' (external portfolio share)
   const [viewMode, setViewMode] = useState<"photographer" | "client">(() => {
@@ -91,10 +91,10 @@ export default function App() {
   useEffect(() => {
     async function initDB() {
       try {
-        const [dbPhotos, dbConfig, dbReviews] = await Promise.all([
+        const [dbPhotos, dbConfig, dbComments] = await Promise.all([
           fetchPhotos(),
           fetchConfig(),
-          fetchReviews()
+          fetchPublicComments()
         ]);
         
         if (dbPhotos && dbPhotos.length > 0) {
@@ -104,8 +104,31 @@ export default function App() {
         }
 
         setConfig(dbConfig);
-        setReviews(dbReviews);
+        setPublicComments(dbComments);
         console.log("Successfully loaded portfolio data from Supabase.");
+
+        // Subscribe to real-time comments
+        subscribeToPublicComments((payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newComment = {
+              id: payload.new.id,
+              photoId: payload.new.photo_id,
+              authorName: payload.new.author_name,
+              text: payload.new.comment_text,
+              isApproved: payload.new.is_approved,
+              createdAt: payload.new.created_at
+            };
+            setPublicComments(prev => [newComment, ...prev]);
+            
+            // Show toast without causing re-render loop
+            const toastEvent = new CustomEvent("show-toast", { detail: "🔔 ¡Nuevo comentario recibido en vivo!" });
+            window.dispatchEvent(toastEvent);
+          } else if (payload.eventType === 'UPDATE') {
+            setPublicComments(prev => prev.map(c => c.id === payload.new.id ? { ...c, isApproved: payload.new.is_approved } : c));
+          } else if (payload.eventType === 'DELETE') {
+            setPublicComments(prev => prev.filter(c => c.id !== payload.old.id));
+          }
+        });
 
       } catch (error) {
         console.error("Failed to fetch from Supabase:", error);
@@ -114,6 +137,17 @@ export default function App() {
       }
     }
     initDB();
+  }, []);
+
+  // Event listener for real-time toast
+  useEffect(() => {
+    const handleToast = (e: any) => {
+      setToastMessage(e.detail);
+      setShowStatusToast(true);
+      setTimeout(() => setShowStatusToast(false), 4500);
+    };
+    window.addEventListener("show-toast", handleToast);
+    return () => window.removeEventListener("show-toast", handleToast);
   }, []);
 
   // Sync viewMode changes to address bar without refreshing for seamless simulation
@@ -142,53 +176,26 @@ export default function App() {
     await updateConfigInSupabase(updatedConfig);
   };
 
-  const handleImportAllData = (importedPhotos: Photo[], importedConfig: PortfolioConfig, importedReviews: ClientReviewSession[]) => {
+  const handleImportAllData = (importedPhotos: Photo[], importedConfig: PortfolioConfig) => {
     // Note: Con Supabase, la importación se hace mediante el script backend (Fase 2 KAIZEN).
     // Esta función en UI queda obsoleta, pero se puede simular actualizando el estado local y pidiendo refresco.
     setPhotos(importedPhotos);
     setConfig(importedConfig);
-    setReviews(importedReviews);
 
     setToastMessage("🔄 Los datos locales se han actualizado (Para sincronizar a Supabase usa el script de migración)");
     setShowStatusToast(true);
     setTimeout(() => setShowStatusToast(false), 4500);
   };
 
-  const handleClearReviews = async () => {
-    await deleteAllReviewsInSupabase();
-    setReviews([]);
-    setToastMessage("Se ha limpiado el historial de feedback de clientes.");
-    setShowStatusToast(true);
-    setTimeout(() => setShowStatusToast(false), 3000);
-  };
-
   const handleClientFeedbackSubmit = async (
     clientName: string,
     clientEmail: string,
     companyName: string,
-    feedbacks: ClientFeedback[],
+    feedbacks: any[],
     generalComment: string
   ) => {
-    const newSession: ClientReviewSession = {
-      id: "review_" + Date.now(),
-      clientName,
-      clientEmail,
-      companyName,
-      createdAt: new Date().toISOString(),
-      feedbacks,
-      generalComment,
-      status: "active",
-    };
-
-    // Update locally instantly for UX
-    setReviews([newSession, ...reviews]);
-    
-    // Push to Supabase
-    await insertReviewSessionInSupabase(newSession);
-    
-    setToastMessage("Se envió el feedback. ¡Puedes comprobarlo en el panel del Fotógrafo!");
-    setShowStatusToast(true);
-    setTimeout(() => setShowStatusToast(false), 4500);
+    // Reemplazado por el nuevo flujo de comentarios públicos,
+    // pero mantenemos la firma vacía para no romper dependencias si alguien lo llama
   };
 
   const handleLogout = () => {
@@ -288,8 +295,7 @@ export default function App() {
               onUpdatePhotos={handlePhotosUpdate}
               config={config}
               onUpdateConfig={handleConfigUpdate}
-              reviews={reviews}
-              onClearReviews={handleClearReviews}
+              publicComments={publicComments}
               onSimulateClientView={() => handleViewModeChange("client")}
               clientLinkUrl={clientLinkUrl}
               onImportAllData={handleImportAllData}
@@ -306,6 +312,7 @@ export default function App() {
             photos={photos}
             config={config}
             brandColor={config.brandColor}
+            publicComments={publicComments}
           />
         )}
       </div>

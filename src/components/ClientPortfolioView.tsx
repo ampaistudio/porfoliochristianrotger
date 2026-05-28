@@ -6,7 +6,7 @@ import {
   Maximize2, 
   Grid 
 } from "lucide-react";
-import { Photo, PortfolioConfig } from "../types";
+import { Photo, PortfolioConfig, PublicComment } from "../types";
 import { getLocalizedText } from "../defaultData";
 import ClientSlideshow from "./client/ClientSlideshow";
 
@@ -14,12 +14,14 @@ interface ClientPortfolioViewProps {
   photos: Photo[];
   config: PortfolioConfig;
   brandColor: string;
+  publicComments: PublicComment[];
 }
 
 export default function ClientPortfolioView({
   photos,
   config,
   brandColor,
+  publicComments,
 }: ClientPortfolioViewProps) {
   // Lang state, initialized from localStorage fallback
   const [lang, setLang] = useState<"es" | "en">(() => {
@@ -81,7 +83,10 @@ export default function ClientPortfolioView({
       <header className="border-b bg-black/80 backdrop-blur sticky top-0 z-40" style={{ borderColor: brandColor }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           <div>
-            <span className="text-[10px] font-mono tracking-[0.25em] text-stone-500 block uppercase font-bold">
+            <span 
+              style={{ color: brandColor }}
+              className="text-[10px] font-mono tracking-[0.25em] block uppercase font-bold drop-shadow-md"
+            >
               {lang === "es" ? "EXPOSICIÓN FOTOGRÁFICA" : "PHOTOGRAPHY EXPOSITION"}
             </span>
             <h1 className="text-lg sm:text-xl font-serif font-black tracking-tight text-white uppercase">
@@ -301,6 +306,8 @@ export default function ClientPortfolioView({
           photos={filteredPhotos}
           startIndex={currentSlideIndex}
           lang={lang}
+          publicComments={publicComments}
+          brandColor={brandColor}
         />
       )}
 
