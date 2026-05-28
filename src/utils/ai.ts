@@ -1,11 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-let genAI: GoogleGenerativeAI | null = null;
-if (apiKey) {
-  genAI = new GoogleGenerativeAI(apiKey);
-}
+const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
 
 export interface CuratorialAnalysis {
   editorialReview_en: string;
@@ -20,12 +13,9 @@ export async function generateCuratorialAnalysis(
   lens: string,
   title: string
 ): Promise<CuratorialAnalysis> {
-  if (!genAI) {
-    throw new Error("No VITE_GEMINI_API_KEY found in .env file.");
+  if (!apiKey) {
+    throw new Error("No VITE_OPENROUTER_API_KEY found in .env file.");
   }
-
-  // Use the recommended model for text and image
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   try {
     // 1. Fetch the image and convert it to Base64
@@ -35,9 +25,7 @@ export async function generateCuratorialAnalysis(
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          // Extract just the base64 data, removing the Data-URL prefix
-          const base64 = reader.result.split(',')[1];
-          resolve(base64);
+          resolve(reader.result); // Includes data:image/...;base64, prefix
         } else {
           reject(new Error("Failed to convert image to base64"));
         }
@@ -45,13 +33,6 @@ export async function generateCuratorialAnalysis(
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-
-    const imagePart = {
-      inlineData: {
-        data: base64String,
-        mimeType: blob.type || "image/jpeg"
-      },
-    };
 
     const prompt = `
 You are an expert photography curator and technical analyst for the fine-art gallery "Nodo AI Agency".
@@ -73,8 +54,35 @@ You must provide the response in BOTH English and Spanish, formatted EXACTLY as 
 Do not include markdown blocks, just the pure JSON object. Keep the curatorial review around 3-4 sentences.
     `;
 
-    const result = await model.generateContent([prompt, imagePart]);
-    const responseText = result.response.text();
+    const payload = {
+      model: "google/gemini-1.5-flash",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            { type: "image_url", image_url: { url: base64String } }
+          ]
+        }
+      ]
+    };
+
+    const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!openRouterRes.ok) {
+      const errorData = await openRouterRes.text();
+      throw new Error(`OpenRouter API error: ${errorData}`);
+    }
+
+    const data = await openRouterRes.json();
+    const responseText = data.choices[0].message.content;
     
     // Clean up response if it contains markdown code blocks
     let jsonStr = responseText;
@@ -87,7 +95,7 @@ Do not include markdown blocks, just the pure JSON object. Keep the curatorial r
     const parsedData = JSON.parse(jsonStr) as CuratorialAnalysis;
     return parsedData;
   } catch (error) {
-    console.error("Error generating AI analysis:", error);
+    console.error("Error generating AI analysis via OpenRouter:", error);
     throw error;
   }
 }
