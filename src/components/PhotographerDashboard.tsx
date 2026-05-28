@@ -96,31 +96,31 @@ export default function PhotographerDashboard({
 
       {/* Main Grid: Stats Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
           <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Fotos en Portafolio</div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-stone-100">{photos.length}</span>
+            <span className="text-3xl font-semibold text-stone-900">{photos.length}</span>
             <span className="text-xs text-stone-500">piezas</span>
           </div>
         </div>
 
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
           <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Comentarios Públicos</div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-stone-100">{publicComments.length}</span>
+            <span className="text-3xl font-semibold text-stone-900">{publicComments.length}</span>
             <span className="text-xs text-stone-500">recibidos</span>
           </div>
         </div>
 
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
           <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Tasa de Aprobación</div>
           <div className="flex items-baseline gap-2 col-span-1">
-            <span className="text-3xl font-semibold text-stone-100">{approvalPercent}%</span>
+            <span className="text-3xl font-semibold text-stone-900">{approvalPercent}%</span>
             <span className="text-xs text-emerald-600 font-medium font-mono">+{approvedTotalCount} públicos</span>
           </div>
         </div>
 
-<div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <span className="text-stone-400 font-mono text-xs uppercase tracking-wider">Color de Acento</span>
           <div className="flex items-center gap-2 mt-2">
             <span className="w-5 h-5 rounded-md border border-stone-300 block" style={{ backgroundColor: config.brandColor }} />
@@ -130,13 +130,13 @@ export default function PhotographerDashboard({
       </div>
 
       {/* Tab select bar */}
-      <div className="border-b border-stone-800 mb-8 flex flex-wrap gap-1">
+      <div className="border-b border-stone-200 mb-8 flex flex-wrap gap-1">
         <button
           onClick={() => { setActiveTab("gallery"); }}
           className={`px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition cursor-pointer ${
             activeTab === "gallery" 
-              ? "border-stone-100 text-stone-100" 
-              : "border-transparent text-stone-400 hover:text-stone-200"
+              ? "border-stone-900 text-stone-900" 
+              : "border-transparent text-stone-500 hover:text-stone-800"
           }`}
         >
           🗃️ Galería & Fotos ({photos.length})
@@ -146,8 +146,8 @@ export default function PhotographerDashboard({
           onClick={() => { setActiveTab("reviews"); }}
           className={`px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
             activeTab === "reviews" 
-              ? "border-stone-100 text-stone-100" 
-              : "border-transparent text-stone-400 hover:text-stone-200"
+              ? "border-stone-900 text-stone-900" 
+              : "border-transparent text-stone-500 hover:text-stone-800"
           }`}
         >
           📩 Feedback de Clientes ({publicComments.length})
@@ -157,8 +157,8 @@ export default function PhotographerDashboard({
           onClick={() => { setActiveTab("settings"); }}
           className={`px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
             activeTab === "settings" 
-              ? "border-stone-100 text-stone-100" 
-              : "border-transparent text-stone-400 hover:text-stone-200"
+              ? "border-stone-900 text-stone-900" 
+              : "border-transparent text-stone-500 hover:text-stone-800"
           }`}
         >
           <Settings className="w-4 h-4 shrink-0" />
