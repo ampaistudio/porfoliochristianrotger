@@ -172,57 +172,41 @@ export default function DashboardGallery({
 
     if (editingPhotoId) {
       const updatedPhoto = {
-        id: editingPhotoId,
-        url: newPhotoUrl,
-        title: newPhotoTitle,
-        description: newPhotoDesc,
-        category: newPhotoCategory,
-        date: newPhotoDate,
-        camera: newPhotoCamera,
-        lens: newPhotoLens,
-        settings: newPhotoSettings,
-        editorialReview: newPhotoEditorial,
-        suggestedSettings: newPhotoSuggested,
-        status: newPhotoStatus,
-        title_es: newPhotoTranslations.title_es,
-        description_es: newPhotoTranslations.description_es,
-        editorialReview_es: newPhotoTranslations.editorialReview_es,
-        suggestedSettings_es: newPhotoTranslations.suggestedSettings_es,
+        id: editingPhotoId, url: newPhotoUrl, title: newPhotoTitle, description: newPhotoDesc,
+        category: newPhotoCategory, date: newPhotoDate, camera: newPhotoCamera, lens: newPhotoLens,
+        settings: newPhotoSettings, editorialReview: newPhotoEditorial, suggestedSettings: newPhotoSuggested,
+        status: newPhotoStatus, title_es: newPhotoTranslations.title_es, description_es: newPhotoTranslations.description_es,
+        editorialReview_es: newPhotoTranslations.editorialReview_es, suggestedSettings_es: newPhotoTranslations.suggestedSettings_es,
         sortOrder: photos.find(p => p.id === editingPhotoId)?.sortOrder
       };
 
-      await savePhotoToSupabase(updatedPhoto);
+      const { error } = await savePhotoToSupabase(updatedPhoto);
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert(`Error al guardar en la base de datos: ${error.message || "Las columnas _es probablemente no existen en Supabase. Verifica haber ejecutado el SQL."}`);
+        return;
+      }
 
-      const updatedPhotos = photos.map((p) => {
-        if (p.id === editingPhotoId) {
-          return updatedPhoto;
-        }
-        return p;
-      });
+      const updatedPhotos = photos.map(p => p.id === editingPhotoId ? updatedPhoto : p);
       onUpdatePhotos(updatedPhotos);
       resetForm();
     } else {
       const newPhoto: Photo = {
-        id: "photo_" + Date.now(),
-        url: newPhotoUrl,
-        title: newPhotoTitle,
-        description: newPhotoDesc,
-        category: newPhotoCategory,
-        date: newPhotoDate || new Date().toISOString().split("T")[0],
-        camera: newPhotoCamera,
-        lens: newPhotoLens,
-        settings: newPhotoSettings,
-        editorialReview: newPhotoEditorial,
-        suggestedSettings: newPhotoSuggested,
-        status: newPhotoStatus,
-        title_es: newPhotoTranslations.title_es,
-        description_es: newPhotoTranslations.description_es,
-        editorialReview_es: newPhotoTranslations.editorialReview_es,
-        suggestedSettings_es: newPhotoTranslations.suggestedSettings_es,
+        id: "photo_" + Date.now(), url: newPhotoUrl, title: newPhotoTitle, description: newPhotoDesc,
+        category: newPhotoCategory, date: newPhotoDate || new Date().toISOString().split("T")[0],
+        camera: newPhotoCamera, lens: newPhotoLens, settings: newPhotoSettings,
+        editorialReview: newPhotoEditorial, suggestedSettings: newPhotoSuggested, status: newPhotoStatus,
+        title_es: newPhotoTranslations.title_es, description_es: newPhotoTranslations.description_es,
+        editorialReview_es: newPhotoTranslations.editorialReview_es, suggestedSettings_es: newPhotoTranslations.suggestedSettings_es,
         sortOrder: photos.length
       };
 
-      await savePhotoToSupabase(newPhoto);
+      const { error } = await savePhotoToSupabase(newPhoto);
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert(`Error al guardar: ${error.message}`);
+        return;
+      }
       onUpdatePhotos([newPhoto, ...photos]);
       resetForm();
     }
@@ -248,7 +232,15 @@ export default function DashboardGallery({
     if (oldI === -1 || newI === -1) return;
     const newPhotos = [...photos]; newPhotos.splice(newI, 0, newPhotos.splice(oldI, 1)[0]);
     const updated = newPhotos.map((p, i) => ({ ...p, sortOrder: i }));
-    onUpdatePhotos(updated); for (const p of updated) await savePhotoToSupabase(p);
+    let hasError = false;
+    for (const p of updated) {
+      const { error } = await savePhotoToSupabase(p);
+      if (error) hasError = true;
+    }
+    if (hasError) {
+      alert("Hubo un error al guardar el nuevo orden en la base de datos.");
+    }
+    onUpdatePhotos(updated);
   };
 
   return (

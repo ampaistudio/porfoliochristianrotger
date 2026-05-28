@@ -213,6 +213,18 @@ export default function ClientSlideshow({
               <span className="hidden sm:inline">{lang === "es" ? "PANTALLA COMPLETA" : "FULLSCREEN"}</span>
             </button>
 
+            {/* Font Size Toggle Button */}
+            <button
+              onClick={() => setZoomText(!zoomText)}
+              className={`border border-stone-850 p-2 sm:p-2.5 rounded-lg transition flex items-center gap-1.5 text-xs font-mono font-bold ${
+                zoomText ? "bg-white text-black" : "bg-stone-900 hover:bg-stone-850 text-stone-300 hover:text-white"
+              }`}
+              title={lang === "es" ? "Alternar Tamaño de Letra" : "Toggle Font Size"}
+            >
+              <span className="font-serif italic font-bold">Aa</span>
+              <span className="hidden sm:inline">{lang === "es" ? "TEXTO" : "TEXT"}</span>
+            </button>
+
             {/* Close Button */}
             <button
               onClick={handleClose}
@@ -327,10 +339,10 @@ export default function ClientSlideshow({
           {/* Description and metadata */}
           <div className="max-w-2xl space-y-3">
             <div className="space-y-1">
-              <h3 className="text-lg font-serif font-black tracking-wide text-white">
+              <h3 className={`${zoomText ? 'text-xl sm:text-2xl' : 'text-lg'} font-serif font-black tracking-wide text-white transition-all`}>
                 {t(activePhoto.title, activePhoto.title_es)}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-400 leading-relaxed font-light">
+              <p className={`${zoomText ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'} text-stone-400 leading-relaxed font-light transition-all`}>
                 {t(activePhoto.description, activePhoto.description_es) || (lang === "es" ? "Sin descripción proporcionada." : "No description provided.")}
               </p>
             </div>
@@ -356,7 +368,7 @@ export default function ClientSlideshow({
                     {lang === "es" ? "Análisis Curatorial (Nodo Ai Agency)" : "Curatorial Review (Nodo Ai Agency)"}
                   </span>
                 </div>
-                <p className="text-xs text-stone-300 leading-relaxed italic">
+                <p className={`${zoomText ? 'text-sm' : 'text-xs'} text-stone-300 leading-relaxed italic transition-all`}>
                   "{t(activePhoto.editorialReview, activePhoto.editorialReview_es)}"
                 </p>
               </div>
@@ -364,17 +376,10 @@ export default function ClientSlideshow({
 
             {/* Public Comments List */}
             <div className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 flex flex-col gap-4 max-h-[250px] overflow-y-auto custom-scrollbar shadow-xl`}>
-              <div className="flex justify-between items-center">
-                <h4 className="text-xs font-mono tracking-widest text-stone-300 uppercase">
+              <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                <h4 className={`${zoomText ? 'text-sm' : 'text-xs'} font-mono tracking-widest text-stone-300 uppercase`}>
                   {lang === "es" ? `Comentarios (${currentPhotoComments.length})` : `Comments (${currentPhotoComments.length})`}
                 </h4>
-                <button 
-                  onClick={() => setZoomText(!zoomText)}
-                  className="p-1 hover:bg-white/10 rounded transition text-stone-300 cursor-pointer"
-                  title="Ampliar Texto"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </button>
               </div>
               
               <div className="space-y-4">
