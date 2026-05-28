@@ -132,8 +132,15 @@ export default function ClientSlideshow({
     setTimeout(() => setShowCommentSuccess(false), 5000);
   };
 
+  if (!photos.length) return null;
+
   const activePhoto = photos[currentSlideIndex];
-  if (!activePhoto) return null;
+  
+  // Helper to fallback to English (with backward compatibility for " | ") if Spanish isn't set
+  const t = (enField: string | undefined, esField: string | undefined) => {
+    if (lang === "es" && esField) return esField;
+    return getLocalizedText(enField, lang);
+  };
 
   const currentPhotoComments = publicComments.filter(c => c.photoId === activePhoto.id && c.isApproved);
 
@@ -147,7 +154,7 @@ export default function ClientSlideshow({
               {lang === "es" ? "DIAPOSITIVA" : "SLIDE"} {currentSlideIndex + 1} {lang === "es" ? "DE" : "OF"} {photos.length} — {activePhoto.category ? activePhoto.category.split(", ").map((c) => getLocalizedText(c, lang)).join(" / ") : ""}
             </span>
             <h2 className="text-base sm:text-lg font-serif font-semibold mt-1">
-              {getLocalizedText(activePhoto.title, lang)}
+              {t(activePhoto.title, activePhoto.title_es)}
             </h2>
           </div>
 
@@ -267,7 +274,7 @@ export default function ClientSlideshow({
           />
           <img
             src={activePhoto.url}
-            alt={getLocalizedText(activePhoto.title, lang)}
+            alt={t(activePhoto.title, activePhoto.title_es)}
             className={`transition-all duration-500 animate-fadeIn pointer-events-none select-none ${
               imageFit === "cover" && isImmersiveTheater
                 ? "w-full h-full object-cover" 
@@ -321,10 +328,10 @@ export default function ClientSlideshow({
           <div className="max-w-2xl space-y-3">
             <div className="space-y-1">
               <h3 className="text-lg font-serif font-black tracking-wide text-white">
-                {getLocalizedText(activePhoto.title, lang)}
+                {t(activePhoto.title, activePhoto.title_es)}
               </h3>
               <p className="text-xs sm:text-sm text-stone-400 leading-relaxed font-light">
-                {getLocalizedText(activePhoto.description, lang) || (lang === "es" ? "Sin descripción proporcionada." : "No description provided.")}
+                {t(activePhoto.description, activePhoto.description_es) || (lang === "es" ? "Sin descripción proporcionada." : "No description provided.")}
               </p>
             </div>
 
@@ -350,7 +357,7 @@ export default function ClientSlideshow({
                   </span>
                 </div>
                 <p className="text-xs text-stone-300 leading-relaxed italic">
-                  "{getLocalizedText(activePhoto.editorialReview, lang)}"
+                  "{t(activePhoto.editorialReview, activePhoto.editorialReview_es)}"
                 </p>
               </div>
             )}

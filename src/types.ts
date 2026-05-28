@@ -10,7 +10,15 @@ export interface Photo {
   settings?: string;
   editorialReview?: string;
   suggestedSettings?: string;
+  
+  // Spanish translations
+  title_es?: string;
+  description_es?: string;
+  editorialReview_es?: string;
+  suggestedSettings_es?: string;
+
   sortOrder?: number;
+  status?: 'published' | 'draft';
 }
 export interface PublicComment {
   id?: string;

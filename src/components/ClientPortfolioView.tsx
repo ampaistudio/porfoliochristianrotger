@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Mail, 
   Instagram, 
@@ -23,6 +23,9 @@ export default function ClientPortfolioView({
   brandColor,
   publicComments,
 }: ClientPortfolioViewProps) {
+  // Solo renderizar fotos públicas (ignorar drafts)
+  const publishedPhotos = photos.filter(p => p.status !== 'draft');
+
   // Lang state, initialized from localStorage fallback
   const [lang, setLang] = useState<"es" | "en">(() => {
     const saved = localStorage.getItem("portfolio_lang");
@@ -34,6 +37,13 @@ export default function ClientPortfolioView({
   // Immersive Slide Projector State
   const [isProjectorOpen, setIsProjectorOpen] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Helper to fallback to English if Spanish isn't set
+  const t = (enField: string | undefined, esField: string | undefined) => {
+    if (lang === "es" && esField) return esField;
+    return getLocalizedText(enField, lang);
+  };
 
   // Sync state to localStorage on language changes
   useEffect(() => {
@@ -54,7 +64,7 @@ export default function ClientPortfolioView({
     lang === "es" ? "Todas" : "All", 
     ...Array.from(
       new Set(
-        photos.flatMap((p) => {
+        publishedPhotos.flatMap((p) => {
           if (!p.category) return [];
           return p.category.split(", ").map((c) => getLocalizedText(c, lang));
         })
@@ -64,8 +74,8 @@ export default function ClientPortfolioView({
 
   // Map category filtration
   const filteredPhotos = selectedCategory === "Todas" || selectedCategory === "All"
-    ? photos 
-    : photos.filter((p) => {
+    ? publishedPhotos 
+    : publishedPhotos.filter((p) => {
         if (!p.category) return false;
         return p.category.split(", ").map((c) => getLocalizedText(c, lang)).includes(selectedCategory);
       });
@@ -77,7 +87,7 @@ export default function ClientPortfolioView({
   };
 
   return (
-    <div className="bg-[#09090b] min-h-screen text-stone-100 font-sans pb-4 transition-colors duration-200 selection:bg-stone-800 selection:text-white">
+    <div className="bg-[#09090b] min-h-screen text-stone-100 font-sans pb-4 transition-colors duration-200 selection:bg-stone-800 selection:text-white" ref={containerRef}>
       
       {/* Cinematic Minimalist Brand Header */}
       <header className="border-b bg-black/80 backdrop-blur sticky top-0 z-40" style={{ borderColor: brandColor }}>
@@ -206,7 +216,7 @@ export default function ClientPortfolioView({
               <div className="aspect-[4/3] bg-stone-950 relative overflow-hidden">
                 <img
                   src={photo.url}
-                  alt={getLocalizedText(photo.title, lang)}
+                  alt={t(photo.title, photo.title_es)}
                   className="w-full h-full object-cover group-hover:scale-[1.04] transition duration-700"
                   referrerPolicy="no-referrer"
                 />
@@ -239,10 +249,10 @@ export default function ClientPortfolioView({
               <div className="p-5 sm:p-6 space-y-3.5">
                 <div className="space-y-1.5">
                   <h3 className="font-serif text-lg font-bold text-white tracking-wide group-hover:text-stone-200 transition">
-                    {getLocalizedText(photo.title, lang)}
+                    {t(photo.title, photo.title_es)}
                   </h3>
                   <p className="text-xs sm:text-sm text-stone-400 line-clamp-2 leading-relaxed h-11 font-light">
-                    {getLocalizedText(photo.description, lang) || (lang === "es" ? "Captura conceptual sin pies de fotos explícitos." : "Conceptual capture without explicit description.")}
+                    {t(photo.description, photo.description_es) || (lang === "es" ? "Captura conceptual sin pies de fotos explícitos." : "Conceptual capture without explicit description.")}
                   </p>
                 </div>
 

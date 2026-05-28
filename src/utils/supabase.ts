@@ -24,7 +24,12 @@ export async function fetchPhotos(): Promise<Photo[]> {
     ...p,
     sortOrder: p.sort_order,
     editorialReview: p.editorialReview,
-    suggestedSettings: p.suggestedSettings
+    suggestedSettings: p.suggestedSettings,
+    status: p.status || 'published',
+    title_es: p.title_es,
+    description_es: p.description_es,
+    editorialReview_es: p.editorialReview_es,
+    suggestedSettings_es: p.suggestedSettings_es
   }));
 }
 
@@ -61,7 +66,12 @@ export async function fetchReviews(): Promise<ClientReviewSession[]> {
 export async function savePhotoToSupabase(photo: Photo) {
   const payload = {
     ...photo,
-    sort_order: photo.sortOrder || 0
+    sort_order: photo.sortOrder || 0,
+    status: photo.status || 'published',
+    title_es: photo.title_es,
+    description_es: photo.description_es,
+    editorialReview_es: photo.editorialReview_es,
+    suggestedSettings_es: photo.suggestedSettings_es
   };
   // @ts-ignore
   delete payload.sortOrder;

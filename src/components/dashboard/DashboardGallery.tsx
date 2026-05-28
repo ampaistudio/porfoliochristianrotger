@@ -6,12 +6,7 @@ import { compressImage, extractExifMetadata } from "../../utils/image";
 import { savePhotoToSupabase, deletePhotoFromSupabase } from "../../utils/supabase";
 import GalleryPhotoForm from "./GalleryPhotoForm";
 
-interface DashboardGalleryProps {
-  photos: Photo[];
-  onUpdatePhotos: (photos: Photo[]) => void;
-  config: PortfolioConfig;
-  onUpdateConfig: (config: PortfolioConfig) => void;
-}
+interface DashboardGalleryProps { photos: Photo[]; onUpdatePhotos: (photos: Photo[]) => void; config: PortfolioConfig; onUpdateConfig: (config: PortfolioConfig) => void; }
 export default function DashboardGallery({
   photos,
   onUpdatePhotos,
@@ -19,28 +14,18 @@ export default function DashboardGallery({
   onUpdateConfig,
 }: DashboardGalleryProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newPhotoUrl, setNewPhotoUrl] = useState("");
-  const [newPhotoTitle, setNewPhotoTitle] = useState("");
-  const [newPhotoDesc, setNewPhotoDesc] = useState("");
-  const [newPhotoDate, setNewPhotoDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [newPhotoUrl, setNewPhotoUrl] = useState(""); const [newPhotoTitle, setNewPhotoTitle] = useState("");
+  const [newPhotoDesc, setNewPhotoDesc] = useState(""); const [newPhotoDate, setNewPhotoDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [newPhotoCategory, setNewPhotoCategory] = useState(() => config.categories?.[0] || "Vida Silvestre | Wildlife");
-  const [newPhotoCamera, setNewPhotoCamera] = useState("Sony Alpha 7R V");
-  const [newPhotoLens, setNewPhotoLens] = useState("FE 85mm f/1.4 GM");
-  const [newPhotoSettings, setNewPhotoSettings] = useState("f/1.8, 1/250s, ISO 100");
-  const [newPhotoEditorial, setNewPhotoEditorial] = useState("");
-  const [newPhotoSuggested, setNewPhotoSuggested] = useState("");
+  const [newPhotoCamera, setNewPhotoCamera] = useState("Sony Alpha 7R V"); const [newPhotoLens, setNewPhotoLens] = useState("FE 85mm f/1.4 GM");
+  const [newPhotoSettings, setNewPhotoSettings] = useState("f/1.8, 1/250s, ISO 100"); const [newPhotoEditorial, setNewPhotoEditorial] = useState("");
+  const [newPhotoSuggested, setNewPhotoSuggested] = useState(""); const [newPhotoStatus, setNewPhotoStatus] = useState<'published' | 'draft'>('published');
+  const [newPhotoTranslations, setNewPhotoTranslations] = useState({ title_es: "", description_es: "", editorialReview_es: "", suggestedSettings_es: "" });
 
   const [isProcessingImage, setIsProcessingImage] = useState(false);
-  const [batchUploadStatus, setBatchUploadStatus] = useState<{
-    current: number;
-    total: number;
-    fileName: string;
-  } | null>(null);
-  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
-  const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [batchUploadStatus, setBatchUploadStatus] = useState<{ current: number; total: number; fileName: string; } | null>(null);
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null); const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false); const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -90,9 +75,10 @@ export default function DashboardGallery({
             description: meta.description,
             category: newPhotoCategory,
             date: new Date().toISOString().split("T")[0],
-            camera: meta.camera,
-            lens: meta.lens,
-            settings: meta.settings,
+            status: newPhotoStatus,
+            camera: meta.camera || newPhotoCamera,
+            lens: meta.lens || newPhotoLens,
+            settings: meta.settings || newPhotoSettings,
             editorialReview: "",
             suggestedSettings: "",
           };
@@ -197,6 +183,12 @@ export default function DashboardGallery({
         settings: newPhotoSettings,
         editorialReview: newPhotoEditorial,
         suggestedSettings: newPhotoSuggested,
+        status: newPhotoStatus,
+        title_es: newPhotoTranslations.title_es,
+        description_es: newPhotoTranslations.description_es,
+        editorialReview_es: newPhotoTranslations.editorialReview_es,
+        suggestedSettings_es: newPhotoTranslations.suggestedSettings_es,
+        sortOrder: photos.find(p => p.id === editingPhotoId)?.sortOrder
       };
 
       await savePhotoToSupabase(updatedPhoto);
@@ -222,6 +214,12 @@ export default function DashboardGallery({
         settings: newPhotoSettings,
         editorialReview: newPhotoEditorial,
         suggestedSettings: newPhotoSuggested,
+        status: newPhotoStatus,
+        title_es: newPhotoTranslations.title_es,
+        description_es: newPhotoTranslations.description_es,
+        editorialReview_es: newPhotoTranslations.editorialReview_es,
+        suggestedSettings_es: newPhotoTranslations.suggestedSettings_es,
+        sortOrder: photos.length
       };
 
       await savePhotoToSupabase(newPhoto);
@@ -231,38 +229,26 @@ export default function DashboardGallery({
   };
 
   const resetForm = () => {
-    setNewPhotoUrl("");
-    setNewPhotoTitle("");
-    setNewPhotoDesc("");
+    setNewPhotoUrl(""); setNewPhotoTitle(""); setNewPhotoDesc("");
     setNewPhotoDate(new Date().toISOString().split("T")[0]);
     setNewPhotoCategory(config.categories?.[0] || "Vida Silvestre | Wildlife");
-    setNewPhotoCamera("Sony Alpha 7R V");
-    setNewPhotoLens("FE 85mm f/1.4 GM");
-    setNewPhotoSettings("f/1.8, 1/250s, ISO 100");
-    setNewPhotoEditorial("");
-    setNewPhotoSuggested("");
-    setEditingPhotoId(null);
-    setShowAddForm(false);
+    setNewPhotoCamera("Sony Alpha 7R V"); setNewPhotoLens("FE 85mm f/1.4 GM"); setNewPhotoSettings("f/1.8, 1/250s, ISO 100");
+    setNewPhotoEditorial(""); setNewPhotoSuggested(""); setNewPhotoStatus('published');
+    setNewPhotoTranslations({ title_es: "", description_es: "", editorialReview_es: "", suggestedSettings_es: "" });
+    setEditingPhotoId(null); setShowAddForm(false);
   };
 
-  const handleDeletePhoto = async (id: string) => {
-    await deletePhotoFromSupabase(id);
-    onUpdatePhotos(photos.filter(p => p.id !== id));
-  };
+  const handleDeletePhoto = async (id: string) => { await deletePhotoFromSupabase(id); onUpdatePhotos(photos.filter(p => p.id !== id)); };
 
   const handleDragStart = (e: React.DragEvent, id: string) => { setDraggedPhotoId(id); e.dataTransfer.effectAllowed = "move"; };
   const handleDropPhoto = async (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     if (!draggedPhotoId || draggedPhotoId === targetId) return;
-    const oldIndex = photos.findIndex(p => p.id === draggedPhotoId);
-    const newIndex = photos.findIndex(p => p.id === targetId);
-    if (oldIndex === -1 || newIndex === -1) return;
-    const newPhotos = [...photos];
-    const [draggedItem] = newPhotos.splice(oldIndex, 1);
-    newPhotos.splice(newIndex, 0, draggedItem);
+    const oldI = photos.findIndex(p => p.id === draggedPhotoId), newI = photos.findIndex(p => p.id === targetId);
+    if (oldI === -1 || newI === -1) return;
+    const newPhotos = [...photos]; newPhotos.splice(newI, 0, newPhotos.splice(oldI, 1)[0]);
     const updated = newPhotos.map((p, i) => ({ ...p, sortOrder: i }));
-    onUpdatePhotos(updated);
-    for (const p of updated) await savePhotoToSupabase(p);
+    onUpdatePhotos(updated); for (const p of updated) await savePhotoToSupabase(p);
   };
 
   return (
@@ -404,6 +390,10 @@ export default function DashboardGallery({
             setNewPhotoEditorial={setNewPhotoEditorial}
             newPhotoSuggested={newPhotoSuggested}
             setNewPhotoSuggested={setNewPhotoSuggested}
+            newPhotoStatus={newPhotoStatus}
+            setNewPhotoStatus={setNewPhotoStatus}
+            newPhotoTranslations={newPhotoTranslations}
+            setNewPhotoTranslations={setNewPhotoTranslations}
             resetForm={resetForm}
             handleAddPhotoSubmit={handleAddPhotoSubmit}
             onUpdateConfig={onUpdateConfig}
@@ -429,9 +419,16 @@ export default function DashboardGallery({
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-              <span className="absolute top-3 left-3 bg-stone-900/90 text-white text-[9px] font-mono tracking-wider px-2 py-0.5 rounded uppercase font-bold">
-                {photo.category ? photo.category.split(", ").map((c) => getLocalizedText(c, "es")).join(" / ") : "Sin Categoría"}
-              </span>
+              <div className="absolute top-3 left-3 flex flex-col gap-1">
+                <span className="bg-stone-900/90 text-white text-[9px] font-mono tracking-wider px-2 py-0.5 rounded uppercase font-bold">
+                  {photo.category ? photo.category.split(", ").map((c) => getLocalizedText(c, "es")).join(" / ") : "Sin Categoría"}
+                </span>
+                {photo.status === 'draft' && (
+                  <span className="bg-amber-500/90 text-white text-[9px] font-mono tracking-wider px-2 py-0.5 rounded uppercase font-bold shadow-sm backdrop-blur-sm w-max border border-amber-400">
+                    🚧 Borrador
+                  </span>
+                )}
+              </div>
 
               {/* Photo Admin Overlay Actions */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
@@ -448,6 +445,13 @@ export default function DashboardGallery({
                     setNewPhotoSettings(photo.settings || "");
                     setNewPhotoEditorial(photo.editorialReview || "");
                     setNewPhotoSuggested(photo.suggestedSettings || "");
+                    setNewPhotoStatus(photo.status || 'published');
+                    setNewPhotoTranslations({
+                      title_es: photo.title_es || "",
+                      description_es: photo.description_es || "",
+                      editorialReview_es: photo.editorialReview_es || "",
+                      suggestedSettings_es: photo.suggestedSettings_es || ""
+                    });
                     setShowAddForm(true);
                   }}
                   className="bg-white hover:bg-stone-50 text-stone-850 p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer"

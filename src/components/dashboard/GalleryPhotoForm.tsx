@@ -13,6 +13,10 @@ interface GalleryPhotoFormProps {
   setNewPhotoDesc: (v: string) => void;
   newPhotoDate: string;
   setNewPhotoDate: (v: string) => void;
+  newPhotoStatus: 'published' | 'draft';
+  setNewPhotoStatus: (v: 'published' | 'draft') => void;
+  newPhotoTranslations: { title_es: string; description_es: string; editorialReview_es: string; suggestedSettings_es: string };
+  setNewPhotoTranslations: (v: any) => void;
   newPhotoCategory: string;
   setNewPhotoCategory: (v: string) => void;
   newPhotoCamera: string;
@@ -41,6 +45,10 @@ export default function GalleryPhotoForm({
   setNewPhotoDesc,
   newPhotoDate,
   setNewPhotoDate,
+  newPhotoStatus,
+  setNewPhotoStatus,
+  newPhotoTranslations,
+  setNewPhotoTranslations,
   newPhotoCategory,
   setNewPhotoCategory,
   newPhotoCamera,
@@ -58,6 +66,7 @@ export default function GalleryPhotoForm({
   onUpdateConfig
 }: GalleryPhotoFormProps) {
   const [inlineNewCategory, setInlineNewCategory] = React.useState("");
+  const [activeLangTab, setActiveLangTab] = React.useState<"en" | "es">("en");
 
   const handleInlineAddCategory = () => {
     if (!inlineNewCategory.trim() || !onUpdateConfig) return;
@@ -117,16 +126,36 @@ export default function GalleryPhotoForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
+          <div className="flex bg-stone-100 p-1 rounded-lg w-max mb-4">
+            <button
+              type="button"
+              onClick={() => setActiveLangTab("en")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition ${activeLangTab === "en" ? "bg-white shadow-sm text-stone-900" : "text-stone-500 hover:text-stone-700"}`}
+            >
+              EN (Default)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveLangTab("es")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition ${activeLangTab === "es" ? "bg-white shadow-sm text-stone-900" : "text-stone-500 hover:text-stone-700"}`}
+            >
+              ES (Traducción)
+            </button>
+          </div>
+
           <div>
             <label className="block text-xs uppercase tracking-wider font-mono font-medium text-stone-500 mb-1">
-              Título de la Foto *
+              {activeLangTab === "en" ? "Photo Title *" : "Título de la Foto *"}
             </label>
             <input
               type="text"
-              required
-              value={newPhotoTitle}
-              onChange={(e) => setNewPhotoTitle(e.target.value)}
-              placeholder="Ej. Sombra de Otoño"
+              required={activeLangTab === "en"}
+              value={activeLangTab === "en" ? newPhotoTitle : newPhotoTranslations.title_es}
+              onChange={(e) => {
+                if (activeLangTab === "en") setNewPhotoTitle(e.target.value);
+                else setNewPhotoTranslations({ ...newPhotoTranslations, title_es: e.target.value });
+              }}
+              placeholder={activeLangTab === "en" ? "e.g. Autumn Shadow" : "Ej. Sombra de Otoño"}
               className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
             />
           </div>
@@ -142,6 +171,20 @@ export default function GalleryPhotoForm({
               onChange={(e) => setNewPhotoDate(e.target.value)}
               className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs uppercase tracking-wider font-mono font-medium text-stone-500 mb-1">
+              Estado de Publicación
+            </label>
+            <select
+              value={newPhotoStatus}
+              onChange={(e) => setNewPhotoStatus(e.target.value as 'published' | 'draft')}
+              className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800 font-medium"
+            >
+              <option value="published">🟢 Publicada (Visible para todos)</option>
+              <option value="draft">🚧 Borrador (Solo visible en Dashboard)</option>
+            </select>
           </div>
         </div>
 
@@ -212,12 +255,15 @@ export default function GalleryPhotoForm({
 
       <div>
         <label className="block text-xs uppercase tracking-wider font-mono font-medium text-stone-500 mb-1">
-          Descripción / Pie de foto descriptivo
+          {activeLangTab === "en" ? "Description / Caption" : "Descripción / Pie de foto"}
         </label>
         <textarea
-          value={newPhotoDesc}
-          onChange={(e) => setNewPhotoDesc(e.target.value)}
-          placeholder="Escribe algo sobre la atmósfera de la foto..."
+          value={activeLangTab === "en" ? newPhotoDesc : newPhotoTranslations.description_es}
+          onChange={(e) => {
+            if (activeLangTab === "en") setNewPhotoDesc(e.target.value);
+            else setNewPhotoTranslations({ ...newPhotoTranslations, description_es: e.target.value });
+          }}
+          placeholder={activeLangTab === "en" ? "Write about the atmosphere..." : "Escribe algo sobre la atmósfera..."}
           rows={2}
           className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-stone-400 text-stone-800"
         />
@@ -270,9 +316,12 @@ export default function GalleryPhotoForm({
             ✨ Análisis Curatorial (IA o Manual)
           </label>
           <textarea
-            value={newPhotoEditorial || ""}
-            onChange={(e) => setNewPhotoEditorial && setNewPhotoEditorial(e.target.value)}
-            placeholder="Ej: Una pieza que captura la esencia del minimalismo..."
+            value={activeLangTab === "en" ? (newPhotoEditorial || "") : (newPhotoTranslations.editorialReview_es || "")}
+            onChange={(e) => {
+              if (activeLangTab === "en" && setNewPhotoEditorial) setNewPhotoEditorial(e.target.value);
+              else setNewPhotoTranslations({ ...newPhotoTranslations, editorialReview_es: e.target.value });
+            }}
+            placeholder={activeLangTab === "en" ? "e.g. A piece that captures minimalism..." : "Ej: Una pieza que captura la esencia del minimalismo..."}
             rows={3}
             className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-amber-500 text-stone-800"
           />
@@ -283,9 +332,12 @@ export default function GalleryPhotoForm({
             💡 Sugerencia Técnica (Tip)
           </label>
           <textarea
-            value={newPhotoSuggested || ""}
-            onChange={(e) => setNewPhotoSuggested && setNewPhotoSuggested(e.target.value)}
-            placeholder="Ej: Utiliza una apertura cerrada f/8 para máxima nitidez..."
+            value={activeLangTab === "en" ? (newPhotoSuggested || "") : (newPhotoTranslations.suggestedSettings_es || "")}
+            onChange={(e) => {
+              if (activeLangTab === "en" && setNewPhotoSuggested) setNewPhotoSuggested(e.target.value);
+              else setNewPhotoTranslations({ ...newPhotoTranslations, suggestedSettings_es: e.target.value });
+            }}
+            placeholder={activeLangTab === "en" ? "e.g. Use f/8 aperture for sharpness..." : "Ej: Utiliza una apertura cerrada f/8 para máxima nitidez..."}
             rows={3}
             className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-amber-500 text-stone-800"
           />
