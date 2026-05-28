@@ -222,7 +222,7 @@ export default function App() {
   const clientLinkUrl = `${window.location.origin}${window.location.pathname}?view=client`;
 
   return (
-    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" ? "dark-theme bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-900"}`}>
+    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" ? "bg-stone-950 text-stone-200" : "bg-stone-100 text-stone-900"}`}>
       
       {/* Dynamic View Selector floating top banner */}
       {isAuthenticated && (

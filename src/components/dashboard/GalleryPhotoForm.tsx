@@ -97,11 +97,9 @@ export default function GalleryPhotoForm({
     try {
       const aiData = await generateCuratorialAnalysis(newPhotoUrl, newPhotoCamera, newPhotoLens, newPhotoTitle || "Sin Título");
       if (setNewPhotoEditorial) setNewPhotoEditorial(aiData.editorialReview_en);
-      if (setNewPhotoSuggested) setNewPhotoSuggested(aiData.suggestedSettings_en);
       setNewPhotoTranslations({
         ...newPhotoTranslations,
-        editorialReview_es: aiData.editorialReview_es,
-        suggestedSettings_es: aiData.suggestedSettings_es
+        editorialReview_es: aiData.editorialReview_es
       });
       alert("¡Análisis Curatorial y Sugerencias generados en Inglés y Español con éxito!");
     } catch (error: any) {
@@ -352,32 +350,30 @@ export default function GalleryPhotoForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] uppercase font-mono text-stone-400 mb-1">
-            Curatorial Review
+          <label className="block text-[10px] uppercase font-mono text-stone-400 mb-1 font-bold">
+            🇺🇸 AI Review (English)
           </label>
           <textarea
-            value={activeLangTab === "en" ? (newPhotoEditorial || "") : (newPhotoTranslations.editorialReview_es || "")}
+            value={newPhotoEditorial || ""}
             onChange={(e) => {
-              if (activeLangTab === "en" && setNewPhotoEditorial) setNewPhotoEditorial(e.target.value);
-              else setNewPhotoTranslations({ ...newPhotoTranslations, editorialReview_es: e.target.value });
+              if (setNewPhotoEditorial) setNewPhotoEditorial(e.target.value);
             }}
-            placeholder={activeLangTab === "en" ? "e.g. A piece that captures minimalism..." : "Ej: Una pieza que captura la esencia del minimalismo..."}
+            placeholder="e.g. A piece that captures minimalism..."
             rows={3}
             className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-amber-500 text-stone-800"
           />
         </div>
 
         <div>
-          <label className="block text-[10px] uppercase font-mono text-stone-400 mb-1">
-            Suggested Settings (Tip)
+          <label className="block text-[10px] uppercase font-mono text-stone-400 mb-1 font-bold">
+            🇪🇸 AI Review (Español)
           </label>
           <textarea
-            value={activeLangTab === "en" ? (newPhotoSuggested || "") : (newPhotoTranslations.suggestedSettings_es || "")}
+            value={newPhotoTranslations.editorialReview_es || ""}
             onChange={(e) => {
-              if (activeLangTab === "en" && setNewPhotoSuggested) setNewPhotoSuggested(e.target.value);
-              else setNewPhotoTranslations({ ...newPhotoTranslations, suggestedSettings_es: e.target.value });
+              setNewPhotoTranslations({ ...newPhotoTranslations, editorialReview_es: e.target.value });
             }}
-            placeholder={activeLangTab === "en" ? "e.g. Use f/8 aperture for sharpness..." : "Ej: Utiliza una apertura cerrada f/8 para máxima nitidez..."}
+            placeholder="Ej: Una pieza que captura la esencia del minimalismo..."
             rows={3}
             className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-amber-500 text-stone-800"
           />

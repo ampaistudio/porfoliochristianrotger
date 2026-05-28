@@ -62,12 +62,10 @@ Your task is to generate:
 You must provide the response in BOTH English and Spanish, formatted EXACTLY as a valid JSON object matching this structure:
 {
   "editorialReview_en": "Your curatorial review EXCLUSIVELY IN ENGLISH here...",
-  "editorialReview_es": "Your curatorial review EXCLUSIVELY IN SPANISH here...",
-  "suggestedSettings_en": "Your suggested settings and technical explanation EXCLUSIVELY IN ENGLISH here...",
-  "suggestedSettings_es": "Your suggested settings and technical explanation EXCLUSIVELY IN SPANISH here..."
+  "editorialReview_es": "Your curatorial review EXCLUSIVELY IN SPANISH here..."
 }
 
-CRITICAL: The _en fields MUST BE WRITTEN IN ENGLISH. The _es fields MUST BE WRITTEN IN SPANISH. Do not mix languages.
+CRITICAL: The _en fields MUST BE WRITTEN IN ENGLISH. The _es fields MUST BE WRITTEN IN SPANISH. Do not mix languages. Do NOT include camera settings.
 Do not include markdown blocks, just the pure JSON object. Keep the curatorial review extremely short, concise, and direct (Maximum 2 short sentences, under 30 words). Avoid overly flowery language.
     `;
 
