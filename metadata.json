@@ -1,0 +1,6 @@
+{
+  "name": "Portfolio de Fotografía Profesional",
+  "description": "Portafolio fotográfico interactivo con selección y comentarios en tiempo real para clientes y sugerencias de pie de foto con Inteligencia Artificial (Gemini).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
