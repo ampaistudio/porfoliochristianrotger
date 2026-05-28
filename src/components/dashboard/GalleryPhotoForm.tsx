@@ -19,6 +19,9 @@ interface GalleryPhotoFormProps {
   newPhotoSettings: string;
   setNewPhotoSettings: (v: string) => void;
   newPhotoEditorial: string;
+  setNewPhotoEditorial?: (v: string) => void;
+  newPhotoSuggested?: string;
+  setNewPhotoSuggested?: (v: string) => void;
   resetForm: () => void;
   handleAddPhotoSubmit: (e: React.FormEvent) => void;
   sampleUnsplashPresets: { label: string; url: string; cat: string }[];
@@ -43,6 +46,9 @@ export default function GalleryPhotoForm({
   newPhotoSettings,
   setNewPhotoSettings,
   newPhotoEditorial,
+  setNewPhotoEditorial,
+  newPhotoSuggested,
+  setNewPhotoSuggested,
   resetForm,
   handleAddPhotoSubmit,
   sampleUnsplashPresets,
@@ -240,12 +246,33 @@ export default function GalleryPhotoForm({
         </div>
       </div>
 
-      {newPhotoEditorial && (
-        <div className="bg-stone-50 p-3.5 rounded-lg border border-stone-100 mt-4">
-          <h5 className="text-xs uppercase font-mono font-bold tracking-wider text-stone-500 mb-1">Análisis Curatorial cargado por IA</h5>
-          <p className="text-xs text-stone-600 leading-relaxed italic">"{newPhotoEditorial}"</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-stone-100 pt-4">
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-mono font-medium text-amber-600 mb-1 flex items-center gap-1.5">
+            ✨ Análisis Curatorial (IA o Manual)
+          </label>
+          <textarea
+            value={newPhotoEditorial || ""}
+            onChange={(e) => setNewPhotoEditorial && setNewPhotoEditorial(e.target.value)}
+            placeholder="Ej: Una pieza que captura la esencia del minimalismo..."
+            rows={3}
+            className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-amber-500 text-stone-800"
+          />
         </div>
-      )}
+
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-mono font-medium text-amber-600 mb-1 flex items-center gap-1.5">
+            💡 Sugerencia Técnica (Tip)
+          </label>
+          <textarea
+            value={newPhotoSuggested || ""}
+            onChange={(e) => setNewPhotoSuggested && setNewPhotoSuggested(e.target.value)}
+            placeholder="Ej: Utiliza una apertura cerrada f/8 para máxima nitidez..."
+            rows={3}
+            className="w-full text-sm bg-stone-50 border border-stone-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-amber-500 text-stone-800"
+          />
+        </div>
+      </div>
 
       <div className="flex justify-end gap-2.5 pt-4 border-t border-stone-100">
         <button

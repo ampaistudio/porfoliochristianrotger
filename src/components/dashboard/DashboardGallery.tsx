@@ -1,14 +1,5 @@
 import React, { useState, useRef } from "react";
-import { 
-  Camera, 
-  Trash2, 
-  Sliders, 
-  PlusCircle, 
-  Image as ImageIcon,
-  Upload,
-  Pencil,
-  RefreshCw
-} from "lucide-react";
+import { Camera, Trash2, Sliders, PlusCircle, Image as ImageIcon, Upload, Pencil, RefreshCw } from "lucide-react";
 import { Photo, PortfolioConfig } from "../../types";
 import { getLocalizedText } from "../../defaultData";
 import { compressImage, extractExifMetadata } from "../../utils/image";
@@ -404,6 +395,9 @@ export default function DashboardGallery({
             newPhotoSettings={newPhotoSettings}
             setNewPhotoSettings={setNewPhotoSettings}
             newPhotoEditorial={newPhotoEditorial}
+            setNewPhotoEditorial={setNewPhotoEditorial}
+            newPhotoSuggested={newPhotoSuggested}
+            setNewPhotoSuggested={setNewPhotoSuggested}
             resetForm={resetForm}
             handleAddPhotoSubmit={handleAddPhotoSubmit}
             sampleUnsplashPresets={sampleUnsplashPresets}

@@ -20,27 +20,23 @@ ON public_comments FOR INSERT
 TO public 
 WITH CHECK (true);
 
--- Todos pueden LEER, pero idealmente solo leen los aprobados (o el cliente JS filtra, pero mejor en DB si se quiere)
-CREATE POLICY "Allow public read for approved comments" 
+-- Como no usamos Supabase Auth, permitimos lectura pública de todos los comentarios.
+-- El frontend se encarga de filtrar cuáles mostrar al cliente y cuáles al administrador.
+CREATE POLICY "Allow public read all comments" 
 ON public_comments FOR SELECT 
 TO public 
-USING (is_approved = true);
-
--- Los administradores (autenticados) pueden LEER todos, ACTUALIZAR y ELIMINAR
-CREATE POLICY "Allow auth read all comments" 
-ON public_comments FOR SELECT 
-TO authenticated 
 USING (true);
 
-CREATE POLICY "Allow auth update comments" 
+-- Permitimos UPDATE y DELETE públicos para que el panel de administración funcione sin Auth token
+CREATE POLICY "Allow public update comments" 
 ON public_comments FOR UPDATE 
-TO authenticated 
+TO public 
 USING (true) 
 WITH CHECK (true);
 
-CREATE POLICY "Allow auth delete comments" 
+CREATE POLICY "Allow public delete comments" 
 ON public_comments FOR DELETE 
-TO authenticated 
+TO public 
 USING (true);
 
 -- 4. Habilitar Supabase Realtime para esta tabla
