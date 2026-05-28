@@ -67,7 +67,7 @@ You must provide the response in BOTH English and Spanish, formatted EXACTLY as 
   "suggestedSettings_es": "Your suggested settings and technical explanation in Spanish here..."
 }
 
-Do not include markdown blocks, just the pure JSON object. Keep the curatorial review around 3-4 sentences.
+Do not include markdown blocks, just the pure JSON object. Keep the curatorial review extremely short, concise, and direct (Maximum 2 short sentences, under 30 words). Avoid overly flowery language.
     `;
 
     const result = await model.generateContent([prompt, imagePart]);
