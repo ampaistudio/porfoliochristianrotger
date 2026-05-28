@@ -5,7 +5,7 @@ import { loadPhotosFromDB, savePhotosToDB } from "./utils/db";
 import PhotographerDashboard from "./components/PhotographerDashboard";
 import ClientPortfolioView from "./components/ClientPortfolioView";
 import AdminLogin from "./components/AdminLogin";
-import { Eye, ShieldAlert, CheckCircle, RefreshCw, Smartphone, Monitor } from "lucide-react";
+import { Eye, ShieldAlert, CheckCircle, RefreshCw, Smartphone, Monitor, Moon, Sun } from "lucide-react";
 
 export default function App() {
   // 1. Core State with localStorage fallback for persistence
@@ -61,6 +61,10 @@ export default function App() {
     return params.get("view") === "client" ? "client" : "photographer";
   });
 
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem("dashboard_theme") !== "light"; // Default to dark mode for admin
+  });
+
   // Security and Authentication States
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try {
@@ -101,6 +105,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("admin_password", adminPassword);
   }, [adminPassword]);
+
+  useEffect(() => {
+    localStorage.setItem("dashboard_theme", isDarkMode ? "dark" : "light");
+  }, [isDarkMode]);
 
   useEffect(() => {
     localStorage.setItem("auth_google_emails", JSON.stringify(authorizedEmails));
@@ -280,7 +288,7 @@ export default function App() {
   const clientLinkUrl = `${window.location.origin}${window.location.pathname}?view=client`;
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col justify-between">
+    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" && isDarkMode ? "dark-theme bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-900"}`}>
       
       {/* Dynamic View Selector floating top banner */}
       <div className="bg-stone-900 border-b border-stone-800 text-stone-300 py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono font-bold z-50">
@@ -315,13 +323,22 @@ export default function App() {
           </div>
 
           {viewMode === "photographer" && isAuthenticated && (
-            <button
-              onClick={handleLogout}
-              className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900 border border-red-900/40 text-red-200 hover:text-white rounded-lg transition-all duration-250 cursor-pointer text-[10px]"
-              title="Cerrar sesión de administrador"
-            >
-              🚪 Salir Panel
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="px-2.5 py-1.5 bg-stone-800/80 hover:bg-stone-700 border border-stone-700 text-stone-300 hover:text-white rounded-lg transition-all duration-250 cursor-pointer flex items-center justify-center"
+                title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+              >
+                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900 border border-red-900/40 text-red-200 hover:text-white rounded-lg transition-all duration-250 cursor-pointer text-[10px]"
+                title="Cerrar sesión de administrador"
+              >
+                🚪 Salir Panel
+              </button>
+            </div>
           )}
         </div>
       </div>
