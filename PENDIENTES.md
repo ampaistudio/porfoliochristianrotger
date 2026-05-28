@@ -1,4 +1,6 @@
 # BACKLOG & FUTURAS MEJORAS KAIZEN
+**Fecha de Registro:** 28 de Mayo de 2026 - 19:48 hrs
+
 Documento creado para registrar las propuestas aprobadas para futuras fases del desarrollo del Portafolio de Alta Gama NODO AI.
 
 ## Prioridades Confirmadas (Aprobadas para futuras iteraciones)
