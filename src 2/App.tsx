@@ -4,6 +4,7 @@ import { DEFAULT_CONFIG, DEFAULT_PHOTOS, DEFAULT_CLIENT_REVIEWS } from "./defaul
 import { loadPhotosFromDB, savePhotosToDB } from "./utils/db";
 import PhotographerDashboard from "./components/PhotographerDashboard";
 import ClientPortfolioView from "./components/ClientPortfolioView";
+import AdminLogin from "./components/AdminLogin";
 import { Eye, ShieldAlert, CheckCircle, RefreshCw, Smartphone, Monitor } from "lucide-react";
 
 export default function App() {
@@ -59,6 +60,55 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get("view") === "client" ? "client" : "photographer";
   });
+
+  // Security and Authentication States
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        return sessionStorage.getItem("admin_authenticated") === "true";
+      }
+    } catch (e) {
+      console.error("Session storage read error:", e);
+    }
+    return false;
+  });
+
+  const [adminPassword, setAdminPassword] = useState<string>(() => {
+    return localStorage.getItem("admin_password") || "admin";
+  });
+
+  const [authorizedEmails, setAuthorizedEmails] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("auth_google_emails");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error("Error reading whitelisted emails:", e);
+    }
+    return ["rotgerchristian@gmail.com"];
+  });
+
+  const [googleClientId, setGoogleClientId] = useState<string>(() => {
+    return (
+      localStorage.getItem("google_client_id") ||
+      "448653609355-68049j4u9b456co09k96pco6p8v3f38h.apps.googleusercontent.com"
+    );
+  });
+
+  // Automatically sync security settings to localStorage
+  useEffect(() => {
+    localStorage.setItem("admin_password", adminPassword);
+  }, [adminPassword]);
+
+  useEffect(() => {
+    localStorage.setItem("auth_google_emails", JSON.stringify(authorizedEmails));
+  }, [authorizedEmails]);
+
+  useEffect(() => {
+    localStorage.setItem("google_client_id", googleClientId);
+  }, [googleClientId]);
 
   const [showStatusToast, setShowStatusToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -206,6 +256,26 @@ export default function App() {
     setTimeout(() => setShowStatusToast(false), 4500);
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem("admin_authenticated");
+    setToastMessage("🚪 ¡Sesión cerrada correctamente!");
+    setShowStatusToast(true);
+    setTimeout(() => setShowStatusToast(false), 3000);
+  };
+
+  const handleLoginSuccess = (userProfile?: { email: string; name: string; picture?: string }) => {
+    setIsAuthenticated(true);
+    sessionStorage.setItem("admin_authenticated", "true");
+    setToastMessage(
+      userProfile && userProfile.email !== "admin@portfolio.local"
+        ? `🔑 ¡Sesión iniciada como ${userProfile.name}! (${userProfile.email})`
+        : "🔑 ¡Sesión de administrador iniciada correctamente!"
+    );
+    setShowStatusToast(true);
+    setTimeout(() => setShowStatusToast(false), 4500);
+  };
+
   // Build client link url
   const clientLinkUrl = `${window.location.origin}${window.location.pathname}?view=client`;
 
@@ -219,45 +289,72 @@ export default function App() {
           <span className="text-stone-400">Puedes simular o compartir el enlace:</span>
         </div>
 
-        <div className="flex items-center gap-1 bg-stone-800/80 p-0.5 rounded-xl border border-stone-700">
-          <button
-            onClick={() => handleViewModeChange("photographer")}
-            className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition ${
-              viewMode === "photographer"
-                ? "bg-white text-stone-950 shadow"
-                : "hover:text-white text-stone-400"
-            }`}
-          >
-            📸 Vista Panel Fotógrafo
-          </button>
-          
-          <button
-            onClick={() => handleViewModeChange("client")}
-            className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition ${
-              viewMode === "client"
-                ? "bg-white text-stone-950 shadow"
-                : "hover:text-white text-stone-400"
-            }`}
-          >
-            👤 Vista Cliente
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-stone-800/80 p-0.5 rounded-xl border border-stone-700">
+            <button
+              onClick={() => handleViewModeChange("photographer")}
+              className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition ${
+                viewMode === "photographer"
+                  ? "bg-white text-stone-950 shadow"
+                  : "hover:text-white text-stone-400"
+              }`}
+            >
+              📸 Vista Panel Fotógrafo
+            </button>
+            
+            <button
+              onClick={() => handleViewModeChange("client")}
+              className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition ${
+                viewMode === "client"
+                  ? "bg-white text-stone-950 shadow"
+                  : "hover:text-white text-stone-400"
+              }`}
+            >
+              👤 Vista Cliente
+            </button>
+          </div>
+
+          {viewMode === "photographer" && isAuthenticated && (
+            <button
+              onClick={handleLogout}
+              className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900 border border-red-900/40 text-red-200 hover:text-white rounded-lg transition-all duration-250 cursor-pointer text-[10px]"
+              title="Cerrar sesión de administrador"
+            >
+              🚪 Salir Panel
+            </button>
+          )}
         </div>
       </div>
 
       {/* Main View Display Router */}
       <div className="flex-1">
         {viewMode === "photographer" ? (
-          <PhotographerDashboard
-            photos={photos}
-            onUpdatePhotos={handlePhotosUpdate}
-            config={config}
-            onUpdateConfig={handleConfigUpdate}
-            reviews={reviews}
-            onClearReviews={handleClearReviews}
-            onSimulateClientView={() => handleViewModeChange("client")}
-            clientLinkUrl={clientLinkUrl}
-            onImportAllData={handleImportAllData}
-          />
+          !isAuthenticated ? (
+            <AdminLogin
+              onLoginSuccess={handleLoginSuccess}
+              authorizedEmails={authorizedEmails}
+              correctPasswordHash={adminPassword}
+              googleClientId={googleClientId}
+            />
+          ) : (
+            <PhotographerDashboard
+              photos={photos}
+              onUpdatePhotos={handlePhotosUpdate}
+              config={config}
+              onUpdateConfig={handleConfigUpdate}
+              reviews={reviews}
+              onClearReviews={handleClearReviews}
+              onSimulateClientView={() => handleViewModeChange("client")}
+              clientLinkUrl={clientLinkUrl}
+              onImportAllData={handleImportAllData}
+              adminPassword={adminPassword}
+              onUpdateAdminPassword={setAdminPassword}
+              authorizedEmails={authorizedEmails}
+              onUpdateAuthorizedEmails={setAuthorizedEmails}
+              googleClientId={googleClientId}
+              onUpdateGoogleClientId={setGoogleClientId}
+            />
+          )
         ) : (
           <ClientPortfolioView
             photos={photos}
