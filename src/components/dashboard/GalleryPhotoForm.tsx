@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { PortfolioConfig } from "../../types";
+import { generateCuratorialAnalysis } from "../../utils/ai";
 import { sampleUnsplashPresets } from "../../defaultData";
 
 interface GalleryPhotoFormProps {
@@ -65,8 +66,9 @@ export default function GalleryPhotoForm({
   handleAddPhotoSubmit,
   onUpdateConfig
 }: GalleryPhotoFormProps) {
-  const [inlineNewCategory, setInlineNewCategory] = React.useState("");
-  const [activeLangTab, setActiveLangTab] = React.useState<"en" | "es">("en");
+  const [inlineNewCategory, setInlineNewCategory] = useState("");
+  const [activeLangTab, setActiveLangTab] = useState<"en" | "es">("en");
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   const handleInlineAddCategory = () => {
     if (!inlineNewCategory.trim() || !onUpdateConfig) return;
@@ -85,6 +87,30 @@ export default function GalleryPhotoForm({
     }
     setInlineNewCategory("");
   };
+
+  const handleGenerateAI = async () => {
+    if (!newPhotoUrl) {
+      alert("Por favor carga una foto primero para que la IA pueda analizarla.");
+      return;
+    }
+    setIsGeneratingAI(true);
+    try {
+      const aiData = await generateCuratorialAnalysis(newPhotoUrl, newPhotoCamera, newPhotoLens, newPhotoTitle || "Sin Título");
+      if (setNewPhotoEditorial) setNewPhotoEditorial(aiData.editorialReview_en);
+      if (setNewPhotoSuggested) setNewPhotoSuggested(aiData.suggestedSettings_en);
+      setNewPhotoTranslations({
+        ...newPhotoTranslations,
+        editorialReview_es: aiData.editorialReview_es,
+        suggestedSettings_es: aiData.suggestedSettings_es
+      });
+      alert("¡Análisis Curatorial y Sugerencias generados en Inglés y Español con éxito!");
+    } catch (error: any) {
+      alert("Error al generar IA: " + error.message);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   return (
     <form onSubmit={handleAddPhotoSubmit} className="space-y-4">
       {/* Standard Fallback Input URL */}
@@ -310,10 +336,24 @@ export default function GalleryPhotoForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-stone-100 pt-4">
+      <div className="flex items-center justify-between border-t border-stone-100 pt-4 mt-2">
+        <h3 className="text-xs uppercase tracking-wider font-mono font-medium text-amber-600 flex items-center gap-1.5">
+          ✨ Análisis Curatorial & Tips
+        </h3>
+        <button
+          type="button"
+          onClick={handleGenerateAI}
+          disabled={isGeneratingAI || !newPhotoUrl}
+          className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 disabled:bg-stone-300 disabled:cursor-not-allowed text-white text-[10px] uppercase font-mono font-bold tracking-widest rounded-md transition shadow-sm flex items-center gap-1.5"
+        >
+          {isGeneratingAI ? "Pensando..." : "🪄 Auto-completar con IA (EN & ES)"}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs uppercase tracking-wider font-mono font-medium text-amber-600 mb-1 flex items-center gap-1.5">
-            ✨ Análisis Curatorial (IA o Manual)
+          <label className="block text-[10px] uppercase font-mono text-stone-400 mb-1">
+            Curatorial Review
           </label>
           <textarea
             value={activeLangTab === "en" ? (newPhotoEditorial || "") : (newPhotoTranslations.editorialReview_es || "")}
@@ -328,8 +368,8 @@ export default function GalleryPhotoForm({
         </div>
 
         <div>
-          <label className="block text-xs uppercase tracking-wider font-mono font-medium text-amber-600 mb-1 flex items-center gap-1.5">
-            💡 Sugerencia Técnica (Tip)
+          <label className="block text-[10px] uppercase font-mono text-stone-400 mb-1">
+            Suggested Settings (Tip)
           </label>
           <textarea
             value={activeLangTab === "en" ? (newPhotoSuggested || "") : (newPhotoTranslations.suggestedSettings_es || "")}
