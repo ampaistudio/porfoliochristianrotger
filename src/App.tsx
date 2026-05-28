@@ -334,13 +334,17 @@ export default function App() {
             ? "bg-stone-950 border-stone-900 text-stone-500" 
             : "bg-stone-50 border-stone-200/60 text-stone-500"
         }`}>
-          <div className="flex justify-center mb-3">
-            <span className="text-[10px] font-mono tracking-[0.2em] font-extrabold text-stone-400 bg-stone-500/10 px-2 py-0.5 rounded border border-stone-500/20">
-              NODO <span className="text-emerald-500">AI</span> AGENCY
-            </span>
+          <div className="max-w-7xl mx-auto px-4 space-y-2">
+            <p className={`font-light text-sm ${!isAuthenticated ? 'text-stone-400' : 'text-stone-600'}`}>
+              © 2026 {config.photographerName} PH • Portafolio de Aprobación & Presentación de Alta Gama
+            </p>
+            <p className={`text-[10px] sm:text-xs font-mono max-w-2xl mx-auto leading-relaxed flex flex-col gap-1 items-center ${!isAuthenticated ? 'text-stone-600' : 'text-stone-400'}`}>
+              <span>Powered by Nodo Ai Agency</span>
+              <a href="https://www.nodoai.co" target="_blank" rel="noreferrer" className="hover:opacity-70 transition-colors">
+                www.nodoai.co
+              </a>
+            </p>
           </div>
-          <p>© 2026 {config.photographerName} PH • Portafolio de Aprobación & Presentación de Alta Gama</p>
-          <p className="mt-1 opacity-70">Potenciado con Gemini AI para flujos de trabajo inteligentes.</p>
         </footer>
       )}
 
