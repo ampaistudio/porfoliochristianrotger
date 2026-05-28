@@ -29,9 +29,9 @@ export async function fetchConfig(): Promise<PortfolioConfig> {
   }
   
   if (data) {
-    // Recuperar las categorías base y fusionarlas con las personalizadas para no perderlas
-    const mergedCategories = Array.from(new Set([...(DEFAULT_CONFIG.categories || []), ...(data.categories || [])]));
-    return { ...data, categories: mergedCategories };
+    // Si la base de datos ya tiene un arreglo de categorías (incluso si lo vaciaron), respetarlo.
+    const categories = Array.isArray(data.categories) ? data.categories : DEFAULT_CONFIG.categories;
+    return { ...data, categories };
   }
   
   return DEFAULT_CONFIG;
