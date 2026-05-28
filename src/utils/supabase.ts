@@ -84,6 +84,8 @@ export async function savePhotoToSupabase(photo: Photo) {
   };
   // @ts-ignore
   delete payload.sortOrder;
+  // @ts-ignore
+  delete payload.status;
   return await supabase.from('photos').upsert([payload]);
 }
 
