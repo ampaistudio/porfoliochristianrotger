@@ -62,11 +62,13 @@ export default function AdminLogin({
         
         {/* Banner header visual */}
         <div className="p-6 sm:p-8 border-b border-stone-800/80 text-center relative">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center mx-auto mb-4 text-stone-900 font-bold text-lg shadow-lg">
-            <KeyRound className="w-6 h-6 text-stone-950" />
+          <div className="inline-block px-3 py-1 bg-stone-950/50 border border-stone-800 rounded-full mb-4">
+            <span className="text-xs font-mono tracking-[0.2em] font-extrabold text-stone-300">
+              NODO <span className="text-emerald-500">AI</span> AGENCY
+            </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-serif text-white tracking-tight">
-            {lang === "es" ? "Acceso Fotógrafo Autorizado" : "Authorized Photographer Access"}
+            {lang === "es" ? "Acceso Administrativo" : "Administrative Access"}
           </h2>
           <p className="text-stone-400 text-xs mt-1.5 font-sans">
             {lang === "es" 

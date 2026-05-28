@@ -62,9 +62,9 @@ export default function PhotographerDashboard({
       {/* Top Banner introducing functionality */}
       <div className="bg-stone-900 text-white rounded-2xl p-5 sm:p-7 mb-8 shadow-md relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="relative z-10 max-w-2xl">
-          <div className="flex items-center gap-2 mb-2 text-stone-300 font-mono text-xs uppercase tracking-widest">
+          <div className="flex items-center gap-2 mb-2 text-stone-300 font-mono text-[10px] sm:text-xs uppercase tracking-[0.15em] font-extrabold">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-            Panel de Control del Fotógrafo
+            NODO AI AGENCY <span className="text-stone-500 font-normal mx-1">|</span> Panel de Control
           </div>
           <h1 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
             {config.title || "Tu Portafolio Creativo"}
@@ -96,7 +96,7 @@ export default function PhotographerDashboard({
 
       {/* Main Grid: Stats Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm">
           <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Fotos en Portafolio</div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-semibold text-stone-900">{photos.length}</span>
@@ -104,7 +104,7 @@ export default function PhotographerDashboard({
           </div>
         </div>
 
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm">
           <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Comentarios Públicos</div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-semibold text-stone-900">{publicComments.length}</span>
@@ -112,7 +112,7 @@ export default function PhotographerDashboard({
           </div>
         </div>
 
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm">
           <div className="text-stone-400 font-mono text-xs uppercase tracking-wider mb-1">Tasa de Aprobación</div>
           <div className="flex items-baseline gap-2 col-span-1">
             <span className="text-3xl font-semibold text-stone-900">{approvalPercent}%</span>
@@ -120,7 +120,7 @@ export default function PhotographerDashboard({
           </div>
         </div>
 
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+<div className="bg-stone-900 border border-stone-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <span className="text-stone-400 font-mono text-xs uppercase tracking-wider">Color de Acento</span>
           <div className="flex items-center gap-2 mt-2">
             <span className="w-5 h-5 rounded-md border border-stone-300 block" style={{ backgroundColor: config.brandColor }} />

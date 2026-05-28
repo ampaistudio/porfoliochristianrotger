@@ -222,7 +222,7 @@ export default function App() {
   const clientLinkUrl = `${window.location.origin}${window.location.pathname}?view=client`;
 
   return (
-    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" && isDarkMode ? "dark-theme bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-900"}`}>
+    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 ${viewMode === "photographer" ? "dark-theme bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-900"}`}>
       
       {/* Dynamic View Selector floating top banner */}
       {isAuthenticated && (
@@ -259,13 +259,6 @@ export default function App() {
 
           {viewMode === "photographer" && (
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="px-2.5 py-1.5 bg-stone-800/80 hover:bg-stone-700 border border-stone-700 text-stone-300 hover:text-white rounded-lg transition-all duration-250 cursor-pointer flex items-center justify-center"
-                title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-              >
-                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
               <button
                 onClick={handleLogout}
                 className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900 border border-red-900/40 text-red-200 hover:text-white rounded-lg transition-all duration-250 cursor-pointer text-[10px]"
