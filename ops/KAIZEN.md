@@ -19,10 +19,26 @@
 9. **Monitoreo de Feedback en Tiempo Real:** Configurar Supabase Realtime para que los checkmarks de aprobación y comentarios del cliente aparezcan en la pantalla del fotógrafo de forma instantánea sin necesidad de recargar el navegador.
 10. **Branding Consolidado y Modo Cliente Limpio:** Mantener el modo cliente libre de banners operacionales de previsualización para visitas externas, garantizando que el diseño premium de Nodo Ai Agency resalte sin interferencias de desarrollo.
 
-## Lección principal
+## Lecciones principales
 
 - La persistencia local-only limita la visibilidad en dispositivos móviles de clientes y navegadores limpios. Es fundamental un enfoque de base de datos distribuida en la nube (Supabase) desde etapas iniciales si se desea un producto premium listo para producción.
+- La autenticación client-side pura (comparación de contraseña en el browser) es un anti-patrón incluso en proyectos personales. SHA-256 desde `.env` es el mínimo viable seguro.
+- El RLS en Supabase es obligatorio desde el día 1. Una política `ALL public` es equivalente a no tener seguridad.
+- Los tipos generados o escritos a mano para la capa de datos eliminan una clase entera de bugs silenciosos.
 
-## Mejora mínima a implementar en la siguiente sesión
+## KAIZEN ejecutados — Auditoría 2026-05-29
 
-- Configurar el cliente oficial de Supabase (`@supabase/supabase-js`) e inicializar la migración del esquema de base de datos de las fotos.
+- [x] **SEC**: Contraseña movida a `.env` con hash SHA-256. Sin hardcoding en código fuente.
+- [x] **SEC**: Login simplificado a solo contraseña. Google OAuth dormido.
+- [x] **SEC**: RLS configurado en Supabase con políticas granulares por tabla.
+- [x] **SEC**: Validación de longitud en comentarios públicos (nombre: 80 chars, texto: 500 chars).
+- [x] **CALIDAD**: `src/types/database.ts` creado. Todos los `any` y `@ts-ignore` eliminados de `supabase.ts`.
+- [x] **LIMPIEZA**: `db.ts` (IndexedDB legacy) eliminado.
+- [x] **OPS**: `.env.example` actualizado con todas las variables reales del proyecto.
+- [x] **OPS**: Formato de restore points con fecha y hora obligatorio documentado en Plan de Vuelo.
+
+## Próximas mejoras (Bloque D pendiente)
+
+- [ ] Eliminar función zombi `handleClientFeedbackSubmit` en `App.tsx`
+- [ ] Reemplazar `CustomEvent("show-toast")` por `useToast()` hook
+- [ ] Extraer `useAuth()` y `usePortfolioData()` de `App.tsx` (target: < 200 líneas)

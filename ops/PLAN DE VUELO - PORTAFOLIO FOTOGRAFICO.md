@@ -275,9 +275,24 @@ Desde la raiz del proyecto:
 
 ## 24. Restore Points
 
-- Todo restore point debe incluir fecha y hora: `fase2-supabase-completada-20260528_113156`.
+### Formato obligatorio
+El nombre de todo restore point DEBE seguir este formato exacto:
+
+```
+<descriptor-kebab-case>-<YYYYMMDD>_<HHMM>
+```
+
+Ejemplos válidos:
+- `fase2-supabase-completada-20260528_1131`
+- `auditoria-bloque-a-20260529_0936`
+- `fix-routing-20260528_2130`
+
+### Reglas
+- La fecha y hora son **obligatorias** — un restore point sin timestamp no es válido.
 - Todos deben vivir dentro de `ops/restore-points/*`.
-- Todo restore point de cierre de sesion debe dejar constancia de que los PENDIENTES fueron revisados.
+- El timestamp evita colisiones entre sesiones y permite ordenar cronológicamente sin ambigüedad.
+- Todo restore point de cierre de sesión debe dejar constancia de que los PENDIENTES fueron revisados y actualizados.
+- Usar siempre hora local del sistema al momento de la creación.
 
 ## 25. Pendientes
 

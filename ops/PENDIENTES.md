@@ -15,14 +15,33 @@
 
 ## 2. Próximas Fases (Base de Datos en la Nube)
 
-### Fase 2: Migración a Supabase (PostgreSQL + Cloud Storage)
-- [ ] Creación e inicialización del proyecto en Supabase (por parte de Christian Rotger).
-- [ ] Instalación de dependencia `@supabase/supabase-js`.
-- [ ] Configuración del cliente Supabase en `src/utils/supabase.ts` y conexión `.env`.
-- [ ] Modelado de bases de datos e inicialización de tablas (`portfolio_config`, `photos`, `reviews`).
-- [ ] Configuración de Supabase Storage para alojar las imágenes físicas y retornar URLs públicas rápidas.
-- [ ] Refactorización de `App.tsx` para sincronizar estados con la base de datos de Supabase en tiempo real.
-- [ ] Adaptación de la importación del archivo JSON para poblar Supabase automáticamente.
+### Fase 2: Migración a Supabase (PostgreSQL + Cloud Storage) — COMPLETADA 2026-05-28
+- [x] Creación e inicialización del proyecto en Supabase (por parte de Christian Rotger).
+- [x] Instalación de dependencia `@supabase/supabase-js`.
+- [x] Configuración del cliente Supabase en `src/utils/supabase.ts` y conexión `.env`.
+- [x] Modelado de bases de datos e inicialización de tablas (`portfolio_config`, `photos`, `reviews`).
+- [x] Configuración de Supabase Storage para alojar las imágenes físicas y retornar URLs públicas rápidas.
+- [x] Refactorización de `App.tsx` para sincronizar estados con la base de datos de Supabase en tiempo real.
+- [x] Adaptación de la importación del archivo JSON para poblar Supabase automáticamente.
+
+---
+
+## 2.1 Plan de Acción — Auditoría Externa 2026-05-29
+
+Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
+
+- [x] **BLOQUE A** (Crítico): Hardcoding eliminado. Auth con SHA-256 desde .env. Google OAuth dormido. Login solo contraseña. — 2026-05-29 ✓ | Restore: `auditoria-bloque-a-20260529_0936`
+- [x] **BLOQUE B** (Alto — código): Validación longitud comentarios, `.env.example` actualizado, error explícito Supabase client. — 2026-05-29 ✓ | Restore: `auditoria-bloque-b-20260529_0940`
+- [x] **BLOQUE B** (Manual RLS): RLS configurado en Supabase — `photos` SELECT, `portfolio_config` SELECT, `public_comments` INSERT+SELECT aprobados, `client_feedbacks` y `client_review_sessions` bloqueadas. — 2026-05-29 ✓ | Restore: `bloque-b-verificado-20260529_1226`
+- [x] **BLOQUE C** (Deuda técnica): `src/types/database.ts` creado, `any` eliminados de `supabase.ts`, `@ts-ignore` eliminados, `db.ts` borrado. — 2026-05-29 ✓ | Restore: `bloque-c-tipos-db-20260529_1241`
+- [ ] **BLOQUE D** (Arquitectura): Extraer custom hooks, eliminar CustomEvent global, `App.tsx` < 200 líneas. — Próxima ola
+
+---
+
+## 2.2 Fase Vigente — Mega-KAIZEN (5 mejoras estructurales)
+
+- [ ] **Fase A:** Configurar Husky + pre-commit hooks (lint + typecheck) — BLOQUEANTE: requiere aprobación de `implementation_plan.md`
+- [ ] **Fases B–E:** Pendientes de definición / aprobación del plan Mega-Kaizen vigente.
 
 ---
 
@@ -31,7 +50,7 @@
 | ID | Riesgo | Mitigación | Estado |
 |---|---|---|---|
 | R1 | Los archivos de código gigantes dificultan la escalabilidad y causan lints lentos | Refactorizar y modularizar archivos bajo la regla estricta de 500 líneas | **Mitigado** |
-| R2 | La app es local-only; los clientes externos solo ven la plantilla por defecto | Migrar el almacenamiento a una base de datos global en la nube (Supabase) | Pendiente Fase 2 |
+| R2 | La app es local-only; los clientes externos solo ven la plantilla por defecto | Migrar el almacenamiento a una base de datos global en la nube (Supabase) | **Mitigado** |
 | R3 | Credenciales expuestas en archivos `.tsx` | Mapear credenciales a variables de entorno de Vite (`import.meta.env.VITE_*`) | **Mitigado** |
 
 ---
@@ -42,4 +61,8 @@
 ---
 
 ## 5. Historial de Puntos de Restauración (Restore Points)
-- `fase1-estructuracion-completa` (2026-05-28): Fase 1 terminada. Archivos refactorizados a <500 líneas y compilación validada.
+- `fase1-estructuracion-completa` (legado — sin timestamp horario): Fase 1 terminada. Archivos refactorizados a <500 líneas y compilación validada.
+- `fase2-supabase-completada-20260528_113156` (2026-05-28 11:31): Fase 2 completada. Migración a Supabase activa. Persistencia cloud operativa.
+- `RESTORE POINT 28MAY2130` (legado — sin timestamp horario): Fix de routing — URL raíz redirige a vista cliente público por defecto.
+- `RESTORE POINT 29MAY0835` (legado — sin timestamp horario): Actualización modelos Gemini fallback array (2.x en lugar de 1.5 deprecados).
+- `auditoria-bloque-a-20260529_0936` (2026-05-29 09:36): Bloque A auditoria cerrado. Hardcoding eliminado, SHA-256 auth, Google OAuth dormido.
