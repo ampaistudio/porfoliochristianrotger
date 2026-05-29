@@ -34,7 +34,7 @@ Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
 - [x] **BLOQUE B** (Alto — código): Validación longitud comentarios, `.env.example` actualizado, error explícito Supabase client. — 2026-05-29 ✓ | Restore: `auditoria-bloque-b-20260529_0940`
 - [x] **BLOQUE B** (Manual RLS): RLS configurado en Supabase — `photos` SELECT, `portfolio_config` SELECT, `public_comments` INSERT+SELECT aprobados, `client_feedbacks` y `client_review_sessions` bloqueadas. — 2026-05-29 ✓ | Restore: `bloque-b-verificado-20260529_1226`
 - [x] **BLOQUE C** (Deuda técnica): `src/types/database.ts` creado, `any` eliminados de `supabase.ts`, `@ts-ignore` eliminados, `db.ts` borrado. — 2026-05-29 ✓ | Restore: `bloque-c-tipos-db-20260529_1241`
-- [ ] **BLOQUE D** (Arquitectura): Extraer custom hooks, eliminar CustomEvent global, `App.tsx` < 200 líneas. — Próxima ola
+- [x] **BLOQUE D** (Arquitectura): `useToast`, `useAuth`, `usePortfolioData` creados. `App.tsx` → 130 líneas. `CustomEvent` eliminado. Función zombi eliminada. — 2026-05-29 ✓ | Restore: `bloque-d-hooks-20260529_1423`
 
 ---
 
@@ -66,3 +66,5 @@ Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
 - `RESTORE POINT 28MAY2130` (legado — sin timestamp horario): Fix de routing — URL raíz redirige a vista cliente público por defecto.
 - `RESTORE POINT 29MAY0835` (legado — sin timestamp horario): Actualización modelos Gemini fallback array (2.x en lugar de 1.5 deprecados).
 - `auditoria-bloque-a-20260529_0936` (2026-05-29 09:36): Bloque A auditoria cerrado. Hardcoding eliminado, SHA-256 auth, Google OAuth dormido.
+- `bloque-c-tipos-db-20260529_1241` (2026-05-29 12:41): Bloque C cerrado. Tipos DB creados, any/@ts-ignore eliminados, db.ts borrado.
+- `auditoria-abc-deploy-20260529_1248` (2026-05-29 12:48): Commit + push + deploy Vercel. Bloques A+B+C completos en producción.
