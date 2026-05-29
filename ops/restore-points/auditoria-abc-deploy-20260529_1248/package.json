@@ -10,8 +10,6 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "restore:point": "node scripts/restore-point.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "prepare": "husky"
   },
   "dependencies": {
@@ -30,20 +28,16 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@vercel/node": "^5.8.6",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "husky": "^9.1.7",
-    "jsdom": "^29.1.1",
     "lint-staged": "^16.4.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.3",
-    "vitest": "^4.1.7"
+    "vite": "^6.2.3"
   }
 }

@@ -12,7 +12,6 @@ export interface DbPhoto {
   suggestedSettings: string | null;
   created_at: string | null;
   sort_order: number | null;
-  thumbnail_url: string | null;
   title_es: string | null;
   description_es: string | null;
   editorialReview_es: string | null;
@@ -77,7 +76,6 @@ export interface PhotoPayload {
   editorialReview?: string | null;
   suggestedSettings?: string | null;
   sort_order: number;
-  thumbnail_url?: string | null;
   title_es?: string | null;
   description_es?: string | null;
   editorialReview_es?: string | null;

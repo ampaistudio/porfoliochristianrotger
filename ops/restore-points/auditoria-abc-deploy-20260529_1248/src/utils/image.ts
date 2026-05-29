@@ -1,16 +1,5 @@
 import ExifReader from "exifreader";
 
-export const generateThumbnail = (file: File): Promise<string> => compressImage(file, 400);
-
-export function getThumbnailUrl(url: string): string {
-  if (!url || url.startsWith("data:")) return url;
-  if (url.includes("unsplash.com")) {
-    const sep = url.includes("?") ? "&" : "?";
-    return `${url}${sep}w=400&q=60`;
-  }
-  return url;
-}
-
 // Helper function to resize and compress images (reduces MB files to ~60-100KB)
 export const compressImage = (file: File, maxWidth: number = 1000): Promise<string> => {
   return new Promise((resolve) => {

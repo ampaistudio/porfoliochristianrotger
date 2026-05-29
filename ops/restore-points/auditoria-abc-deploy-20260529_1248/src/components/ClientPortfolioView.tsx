@@ -217,7 +217,7 @@ export default function ClientPortfolioView({
               {/* Photo Area with Zoom on Hover */}
               <div className="aspect-[4/3] bg-stone-950 relative overflow-hidden">
                 <img
-                  src={photo.thumbnail_url || photo.url}
+                  src={photo.url}
                   alt={t(photo.title, photo.title_es)}
                   className="w-full h-full object-cover group-hover:scale-[1.04] transition duration-700"
                   referrerPolicy="no-referrer"

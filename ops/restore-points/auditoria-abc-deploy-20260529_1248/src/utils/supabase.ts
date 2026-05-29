@@ -83,7 +83,6 @@ export async function savePhotoToSupabase(photo: Photo) {
     editorialReview: photo.editorialReview ?? null,
     suggestedSettings: photo.suggestedSettings ?? null,
     sort_order: photo.sortOrder ?? 0,
-    thumbnail_url: photo.thumbnail_url ?? null,
     title_es: photo.title_es ?? null,
     description_es: photo.description_es ?? null,
     editorialReview_es: photo.editorialReview_es ?? null,

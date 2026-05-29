@@ -1,0 +1,102 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+let genAI: GoogleGenerativeAI | null = null;
+if (apiKey) {
+  genAI = new GoogleGenerativeAI(apiKey);
+}
+
+export interface CuratorialAnalysis {
+  editorialReview_en: string;
+  editorialReview_es: string;
+  suggestedSettings_en: string;
+  suggestedSettings_es: string;
+}
+
+export async function generateCuratorialAnalysis(
+  imageUrl: string,
+  camera: string,
+  lens: string,
+  title: string
+): Promise<CuratorialAnalysis> {
+  if (!genAI) {
+    throw new Error("No VITE_GEMINI_API_KEY found in .env file.");
+  }
+
+  const modelsToTry = [
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-pro"
+  ];
+
+  let lastError = null;
+
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const base64String = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            const base64 = reader.result.split(',')[1];
+            resolve(base64);
+          } else {
+            reject(new Error("Failed to convert image to base64"));
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      const imagePart = {
+        inlineData: {
+          data: base64String,
+          mimeType: blob.type || "image/jpeg"
+        },
+      };
+
+      const prompt = `
+You are an expert photography curator and technical analyst for the fine-art gallery "Nodo AI Agency".
+Analyze the provided photograph. The photograph has the title "${title}".
+The technical equipment used was Camera: ${camera}, Lens: ${lens}.
+
+Your task is to generate:
+1. An elegant, poetic, and professional "Curatorial Review" that describes the mood, lighting, composition, and emotional impact of the photo.
+2. A "Suggested Settings" (Technical Tip) block that estimates the technical settings (Aperture, Shutter Speed, ISO) that might have been used or would be ideal for this shot, explaining briefly why.
+
+You must provide the response in BOTH English and Spanish, formatted EXACTLY as a valid JSON object matching this structure:
+{
+  "editorialReview_en": "Your curatorial review EXCLUSIVELY IN ENGLISH here...",
+  "editorialReview_es": "Your curatorial review EXCLUSIVELY IN SPANISH here..."
+}
+
+CRITICAL: The _en fields MUST BE WRITTEN IN ENGLISH. The _es fields MUST BE WRITTEN IN SPANISH. Do not mix languages. Do NOT include camera settings.
+Do not include markdown blocks, just the pure JSON object. Keep the curatorial review extremely short, concise, and direct (Maximum 2 short sentences, under 30 words). Avoid overly flowery language.
+      `;
+
+      const result = await model.generateContent([prompt, imagePart]);
+      const responseText = result.response.text();
+      
+      let jsonStr = responseText;
+      if (jsonStr.includes('```json')) {
+        jsonStr = jsonStr.split('```json')[1].split('```')[0].trim();
+      } else if (jsonStr.includes('```')) {
+        jsonStr = jsonStr.split('```')[1].split('```')[0].trim();
+      }
+
+      const parsedData = JSON.parse(jsonStr) as CuratorialAnalysis;
+      return parsedData; // Successfully generated!
+    } catch (error: any) {
+      console.warn(`Model ${modelName} failed:`, error.message || error);
+      lastError = error;
+      // Continue to the next model in the fallback array
+    }
+  }
+
+  console.error("All Gemini fallback models failed.");
+  throw lastError || new Error("Failed to generate AI analysis via Gemini after exhausting all models.");
+}

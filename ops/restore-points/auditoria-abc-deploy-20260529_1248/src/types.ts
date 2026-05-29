@@ -19,7 +19,6 @@ export interface Photo {
 
   sortOrder?: number;
   status?: 'published' | 'draft';
-  thumbnail_url?: string;
 }
 export interface PublicComment {
   id?: string;
