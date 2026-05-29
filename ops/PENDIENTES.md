@@ -55,6 +55,19 @@ Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
 
 ---
 
+## 3.5 Ideas de Producto — Backlog Estratégico (2026-05-29)
+
+> Ideas registradas para evaluar en futuras olas. No tienen orden de ejecución aprobado aún.
+
+### 💰 Monetización
+- [ ] **Tienda de venta de fotos** — El cliente puede comprar licencias o prints de fotos directamente desde la vista pública. Requiere catálogo de productos, precios por foto/licencia y pasarela de cobro.
+- [ ] **Pasarela de cobro** — Integrar Stripe (o MercadoPago para LATAM) para procesar pagos de la tienda. Requiere cuenta Stripe + Supabase Edge Function para manejar webhooks.
+
+### 🖼️ Contenido
+- [ ] **Wallpapers gratuitos** — Sección pública con fotos seleccionadas disponibles para descarga libre (versión watermarked o resolución reducida). Genera tráfico orgánico y visibilidad de marca. No requiere pasarela — solo botón de descarga con tracking.
+
+---
+
 ## 4. Deuda Técnica
 - La lógica de IndexedDB es temporal y será reemplazada por Supabase en la Fase 2, por lo que no debemos invertir esfuerzo extra en optimizar su capacidad de búfer actual.
 
