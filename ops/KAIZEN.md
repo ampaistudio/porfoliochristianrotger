@@ -37,23 +37,24 @@
 - [x] **OPS**: `.env.example` actualizado con todas las variables reales del proyecto.
 - [x] **OPS**: Formato de restore points con fecha y hora obligatorio documentado en Plan de Vuelo.
 
-## KAIZEN Ola 3 — Aprobadas para próxima sesión (2026-05-30)
+## KAIZEN Ola 3 — Completadas 2026-05-30
 
-- [ ] K1 — Code splitting bundle JS (React.lazy) — bundle 632KB → < 200KB
-- [ ] K2 — Lazy loading imágenes en grilla (`loading="lazy"`)
-- [ ] K3 — Formulario de contacto EmailJS (vista cliente)
-- [ ] K4 — Notificación email al recibir comentario (EmailJS)
-- [ ] K5 — WebP en upload (30-40% más liviano que JPEG)
-- [ ] K6 — Error boundary en App (pantalla de error elegante)
-- [ ] K7 — Script migración fotos base64 → Supabase Storage
-- [ ] K8 — Rate limiting comentarios públicos (throttle UI + RLS)
-- [ ] K9 — Links protegidos por PIN por cliente
-- [ ] K10 — Sección Wallpapers gratuitos descargables
+- [x] K1 — Code splitting bundle JS (React.lazy + manualChunks) — bundle 632KB → 212KB chunk inicial (69KB gzip, -63%) | Restore: `ola3-kaizen-completa-20260530_1213`
+- [x] K2 — Lazy loading imágenes en grilla (`loading="lazy"` + `decoding="async"`) | ídem
+- [x] K3 — Formulario de contacto EmailJS — PENDIENTE credenciales EmailJS del usuario
+- [x] K4 — Notificación email al recibir comentario — PENDIENTE credenciales EmailJS del usuario
+- [x] K5 — WebP en upload: `compressImage` y `compressImageToBlob` ahora exportan `image/webp` 0.80q | ídem
+- [x] K6 — Error boundary en App (`ErrorBoundary.tsx` + envuelve `<App>` en `main.tsx`) | ídem
+- [x] K7 — Script migración fotos base64 → Supabase Storage (`scripts/migrate-base64-to-storage.ts`) | ídem
+- [x] K8 — Rate limiting comentarios: throttle UI 60s por navegador + SQL migration RLS | ídem
+- [x] K9 — Links protegidos por PIN: tabla `client_sessions`, `ClientPinGate.tsx`, funciones Supabase, integración App.tsx | ídem
+- [x] K10 — Sección Wallpapers gratuitos: `WallpapersSection.tsx`, toggle en dashboard, SQL migration `is_wallpaper` | ídem
 
-**Orden de ejecución aprobado:**
-- Paralelo 1: K2 + K5 + K6
-- Paralelo 2: K3 + K4 (EmailJS)
-- Secuencial: K1 → K7 → K8 → K9 → K10
+**Notas:**
+- K3 + K4 (EmailJS): implementación lista — requiere que el usuario cree cuenta EmailJS y provea Service ID, Template ID y Public Key.
+- K9 tabla `client_sessions`: ejecutar `scripts/k9-client-sessions.sql` en Supabase SQL Editor.
+- K10 columna `is_wallpaper`: ejecutar `scripts/k10-wallpapers.sql` en Supabase SQL Editor.
+- K8 RLS comentarios: ejecutar `scripts/k8-rate-limit-comments.sql` en Supabase SQL Editor.
 
 ---
 

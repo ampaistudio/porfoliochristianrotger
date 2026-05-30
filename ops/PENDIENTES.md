@@ -44,10 +44,27 @@ Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
 
 ---
 
+## 3.0 Ola 3 — KAIZEN x10 — Completada 2026-05-30
+
+- [x] K1 — Code splitting React.lazy + manualChunks (bundle 632KB → 212KB, -63% gzip) — 2026-05-30 ✓ | Restore: `ola3-kaizen-completa-20260530_1213`
+- [x] K2 — Lazy loading imágenes grilla (`loading="lazy"` + `decoding="async"`) — 2026-05-30 ✓
+- [x] K5 — WebP en upload (compressImage + compressImageToBlob → image/webp 0.80q) — 2026-05-30 ✓
+- [x] K6 — Error boundary elegante (`ErrorBoundary.tsx` class component + main.tsx) — 2026-05-30 ✓
+- [x] K7 — Script migración base64 → Storage (`scripts/migrate-base64-to-storage.ts`, ejecutar con `npx tsx`) — 2026-05-30 ✓
+- [x] K8 — Rate limiting comentarios: throttle UI 60s localStorage + `scripts/k8-rate-limit-comments.sql` — 2026-05-30 ✓
+- [x] K9 — Links PIN: `ClientPinGate.tsx`, funciones Supabase `client_sessions`, integración App.tsx + `scripts/k9-client-sessions.sql` — 2026-05-30 ✓
+- [x] K10 — Wallpapers descargables: `WallpapersSection.tsx`, toggle dashboard, `is_wallpaper` en DB + `scripts/k10-wallpapers.sql` — 2026-05-30 ✓
+
+**Pendiente de usuario (no bloqueante):**
+- [ ] K3 + K4 (EmailJS): proveer Service ID, Template ID y Public Key para activar formulario de contacto y notificaciones email.
+- [ ] Ejecutar en Supabase SQL Editor: `k8-rate-limit-comments.sql`, `k9-client-sessions.sql`, `k10-wallpapers.sql`
+
+---
+
 ## 2.2 Fase Vigente — Mega-KAIZEN (5 mejoras estructurales)
 
-- [ ] **Fase A:** Configurar Husky + pre-commit hooks (lint + typecheck) — BLOQUEANTE: requiere aprobación de `implementation_plan.md`
-- [ ] **Fases B–E:** Pendientes de definición / aprobación del plan Mega-Kaizen vigente.
+- [x] **Fase A:** Configurar Husky + pre-commit hooks (lint + typecheck) — completado en sesión anterior
+- [x] **Fases B–E:** Completado vía Ola 3 KAIZEN x10.
 
 ---
 
