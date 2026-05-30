@@ -26,6 +26,12 @@
 
 ---
 
+## 2.0.1 Ola 2B — Completada 2026-05-30
+
+- [x] **Supabase Storage activo**: Bucket `portfolio-photos` operativo. Fotos subidas con URL permanente `supabase.co/storage/...`. Thumbnail automático en `/thumbnails/`. Fallback a base64 si Storage falla. Verificado en producción. | Restore: `ola2b-storage-verificado-20260530_1042`
+
+---
+
 ## 2.1 Plan de Acción — Auditoría Externa 2026-05-29
 
 Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
