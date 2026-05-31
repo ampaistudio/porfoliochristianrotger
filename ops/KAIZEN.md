@@ -58,8 +58,30 @@
 
 ---
 
-## Próximas mejoras (Bloque D pendiente)
+## KAIZEN Ola 4 — Completadas 2026-05-30
 
-- [ ] Eliminar función zombi `handleClientFeedbackSubmit` en `App.tsx`
-- [ ] Reemplazar `CustomEvent("show-toast")` por `useToast()` hook
-- [ ] Extraer `useAuth()` y `usePortfolioData()` de `App.tsx` (target: < 200 líneas)
+- [x] K1 — ContactModal "Contratar/Hire Me" en header cliente: `ContactModal.tsx`, EmailJS REST si configurado, fallback mailto | Restore: `ola4-kaizen-completa-20260530_2204`
+- [x] K2 — EmailJS notificación tras comentario: `notifyNewComment()` en `ClientSlideshow.tsx` (silent, non-blocking) | ídem
+- [x] K3 — UI gestión sesiones PIN: Tab "Sesiones PIN" en dashboard, `DashboardSessions.tsx` — crear/listar/borrar/copiar link | ídem
+- [x] K4 — Gemini UX mejorado: indicador "Gemini activo / añadir API key", feedback toast en lugar de `alert()`, botón deshabilitado si no configurado | ídem
+- [x] K5 — Supabase Realtime extendido: `usePortfolioData.ts` suscribe a tabla `photos` (cambios remotos reflejan en vivo) | ídem
+- [x] K6 — Modo cliente limpio: Admin bar ocultado en `viewMode === "client"`, botón flotante "← Panel Fotógrafo" para volver | ídem
+- [x] K7 — PWA install prompt: hook `usePWAInstall.ts`, botón "Instalar" visible en mobile cuando browser lo soporta | ídem
+- [x] K8 — Marcas de agua dinámicas: `©${config.photographerName} ${año}` en grilla y slideshow (reemplaza hardcode "Christian Rotger 2026") | ídem
+- [x] K9 — Heatmap básico: `usePhotoViewTracker.ts` registra tiempo por foto en localStorage; widget en DashboardReviews con barras de progreso | ídem
+- [x] K10 — Dominio personalizado: instrucciones en PENDIENTES (Vercel Dashboard > Domains) — no requiere código
+
+**Notas K1+K2 (EmailJS):**
+- Agregar a `.env`: `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_CONTACT`, `VITE_EMAILJS_TEMPLATE_COMMENT`, `VITE_EMAILJS_PUBLIC_KEY`
+- Sin credenciales: K1 usa fallback `mailto:`, K2 es silencioso
+
+**Nota K4 (Gemini):**
+- Agregar `VITE_GEMINI_API_KEY` en `.env` (ver `.env.example`)
+- Obtener en: https://aistudio.google.com/app/apikey
+
+---
+
+## Próximas mejoras (deuda técnica registrada)
+
+- [ ] Eliminar función zombi `handleClientFeedbackSubmit` en `App.tsx` (ya fue removida en Bloque D)
+- [ ] K9 heatmap: opcional, migrar a Supabase en lugar de localStorage para stats cross-device

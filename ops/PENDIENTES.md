@@ -61,6 +61,26 @@ Ver plan completo en `ops/PLAN-ACCION-AUDITORIA-29MAY2026.md`
 
 ---
 
+## 4.0 Ola 4 — KAIZEN x10 — Completada 2026-05-30
+
+- [x] K1 — ContactModal "Contratar/Hire Me" (`ContactModal.tsx`) con EmailJS o fallback mailto | Restore: `ola4-kaizen-completa-20260530_2204`
+- [x] K2 — Notificación email al recibir comentario (EmailJS silent, `ClientSlideshow.tsx`) | ídem
+- [x] K3 — Tab "Sesiones PIN" en dashboard (`DashboardSessions.tsx`): crear/ver/copiar/borrar links | ídem
+- [x] K4 — Gemini UX: indicador estado, toast feedback, botón deshabilitado sin API key | ídem
+- [x] K5 — Supabase Realtime extendido a tabla `photos` en `usePortfolioData.ts` | ídem
+- [x] K6 — Modo cliente limpio: admin bar solo en `viewMode === "photographer"`, botón flotante para volver | ídem
+- [x] K7 — PWA install prompt: `usePWAInstall.ts` + botón en header cliente | ídem
+- [x] K8 — Watermark dinámico: `©${config.photographerName} ${año}` en grilla y slideshow | ídem
+- [x] K9 — Heatmap básico: `usePhotoViewTracker.ts` + widget en DashboardReviews | ídem
+- [x] K10 — Dominio personalizado: Vercel Dashboard > Domains > Add. No requiere código. | ídem
+
+**Pendiente de usuario (no bloqueante):**
+- [ ] K1+K2 (EmailJS): añadir credenciales en `.env` (`VITE_EMAILJS_*`) para activar envío real
+- [ ] K4 (Gemini): añadir `VITE_GEMINI_API_KEY` en `.env` para activar análisis IA
+- [ ] K10 (dominio): configurar dominio en Vercel Dashboard > Domains (ej: rotger.photo)
+
+---
+
 ## 2.2 Fase Vigente — Mega-KAIZEN (5 mejoras estructurales)
 
 - [x] **Fase A:** Configurar Husky + pre-commit hooks (lint + typecheck) — completado en sesión anterior
